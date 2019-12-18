@@ -4,7 +4,7 @@
 
 #define MASK_ALLOC_OFFSET(x) (x)
 #define CACHELINE_BYTES 64
-#define INTERATION 100
+#define ITERATION 100
 int rank, pSize; //rank：当前进程ID，pSize：总的进程数
 
 void initialize(float *ptr_prev, float *ptr_vel, float *ptr_next, int x_size, int y_size, int z_size)
@@ -35,13 +35,16 @@ int main(int argc, char *argv[])
     int up, down;
     int kbegin, kend;
     int step;
-
+printf("%s,%d\n",__FILE__,__LINE__);
+    MPI_Init(&argc, &argv);                //MPI初始化语句
+    MPI_Comm_rank(MPI_COMM_WORLD, &rank);  //获取当前进程的pID
+    MPI_Comm_size(MPI_COMM_WORLD, &pSize); //获取进程总数
     haloSize = HALF_LENGTH;
     MPI_Status status;
-    x_size = 300;
-    y_size = 300;
-    z_size = 256;
-    nthread = 12;
+    x_size = 100;
+    y_size = 100;
+    z_size = 64;
+    nthread = pSize;
 
     if ((argc > 1) && (argc < 4))
     {
@@ -62,7 +65,7 @@ int main(int argc, char *argv[])
     }
     blockSize = floor(z_size / nthread); //z方向上的分量
     totalSize = x_size * y_size * z_size;
-    print("x_size:%d,y_size:%d,z_size:%d,nthread:%d\n", x_size, y_size, z_size, nthread);
+    printf("x_size:%d,y_size:%d,z_size:%d,nthread:%d\n", x_size, y_size, z_size, nthread);
     float *prev = (float *)_mm_malloc((totalSize + 16 + MASK_ALLOC_OFFSET(0)) * sizeof(float), CACHELINE_BYTES);
     float *vel = (float *)_mm_malloc((totalSize + 16 + MASK_ALLOC_OFFSET(16)) * sizeof(float), CACHELINE_BYTES);
     float *next = (float *)_mm_malloc((totalSize + 16 + MASK_ALLOC_OFFSET(32)) * sizeof(float), CACHELINE_BYTES);
@@ -88,19 +91,15 @@ int main(int argc, char *argv[])
 #error "HALF_LENGTH not implemented"
 #endif
 
-    print("1.进行mpi初始化");
-    MPI_Init(&argc, &argv);                //MPI初始化语句
-    MPI_Comm_rank(MPI_COMM_WORLD, &rank);  //获取当前进程的pID
-    MPI_Comm_size(MPI_COMM_WORLD, &pSize); //获取进程总数
+    printf("1.进行mpi初始化");
 
+printf("%s,%d\n",__FILE__,__LINE__);
     //（数据，数据大小，根进程编号，通讯域）将root进程的数据广播到所有其它的进程
     MPI_Bcast(coeff, HALF_LENGTH + 1, MPI_FLOAT, 0, MPI_COMM_WORLD); //（数据，数据大小，根进程编号，通讯域）
     initialize(prev, vel, next, x_size, y_size, z_size);
     step = 0;
     while (step < ITERATION)
     {
-        if (rank < nthread)
-        {
             int calculateBegin = HALF_LENGTH + k * blockSize;
             if (rank == 0)
             {
@@ -137,6 +136,7 @@ int main(int argc, char *argv[])
                 }
             }
             printf("3.开始赋值计算");
+printf("%s,%d\n",__FILE__,__LINE__);
             for (int k = calculateBegin; k < calculateBegin + blockSize; k++)
             {
                 for (int i = HALF_LENGTH / 2; i < x_size - HALF_LENGTH / 2; i++)
@@ -145,22 +145,24 @@ int main(int argc, char *argv[])
                     {
                         prev[k * z_size * y_size + j * y_size + i] = vel[k * z_size * y_size + j * y_size + i];
                         vel[k * z_size * y_size + j * y_size + i] = next[k * z_size * y_size + j * y_size + i];
-                        printf("%f\n", vel[k * z_size * y_size + j * y_size + i]);
+                        //printf("%f\n", vel[k * z_size * y_size + j * y_size + i]);
                     }
                 }
             }
 
+printf("%s,%d\n",__FILE__,__LINE__);
             int upkey = calculateBegin * z_size * y_size + HALF_LENGTH / 2 * y_size + HALF_LENGTH / 2;
             int downkey = (calculateBegin - 4) * z_size * y_size + HALF_LENGTH / 2 * y_size + calculateBegin - 4;
 
             printf("开始更新halo区");
             //更新pre进程的下halo区,更新now进程的上halo区
+printf("%s,%d\n",__FILE__,__LINE__);
             MPI_Sendrecv(&vel[upkey], 4 * x_size * y_size, MPI_FLOAT, up, 1, &vel[upkey], 4 * x_size * y_size, MPI_FLOAT, down, 1, MPI_COMM_WORLD, &status);
 
             //更新now进程的下halo区,更新next进程的上halo区
-            MPI_Sendrecv(&vel[downkey], 4 * x_size * y_size, MPI_FLOAT, down, 1, &vel[downkey], 4 * x_size * y_size, MPI_FLOAT, down, 1, MPI_COMM_WORLD, &status); //上halo区
+            MPI_Sendrecv(&vel[downkey], 4 * x_size * y_size, MPI_FLOAT, down, 1, &vel[downkey], 4 * x_size * y_size, MPI_FLOAT, up, 1, MPI_COMM_WORLD, &status); //上halo区
+printf("%s,%d\n",__FILE__,__LINE__);
             step++;
-        }
     }
     MPI_Finalize();
     return 0;
