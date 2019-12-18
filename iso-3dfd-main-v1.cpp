@@ -131,11 +131,11 @@ int main(int argc, char* argv[]){
         int downkey=(calculateBegin - 4)*z_size*y_size + HALF_LENGTH/2*y_size + calculateBegin - 4;
         
         //更新pre进程的下halo区,更新now进程的上halo区
-        status=MPI_SENDRECV(vel[upkey]],4*x_size*y_size,MPI_FLOAT,up,1,vel[upkey],4*x_size*y_size,MPI_FLOAT,down,1,MPI_COMM_WORLD);
+        status=MPI_SENDRECV(vel[upkey],4*x_size*y_size,MPI_FLOAT,up,1,vel[upkey],4*x_size*y_size,MPI_FLOAT,down,1,MPI_COMM_WORLD);
       
 
         //更新now进程的下halo区,更新next进程的上halo区
-        status=MPI_SENDRECV(vel[downkey]],4*x_size*y_size,MPI_FLOAT,right,1,vel[downkey],4*x_size*y_size,MPI_FLOAT,down,1,MPI_COMM_WORLD);//上halo区
+        status=MPI_SENDRECV(vel[downkey],4*x_size*y_size,MPI_FLOAT,down,1,vel[downkey],4*x_size*y_size,MPI_FLOAT,down,1,MPI_COMM_WORLD);//上halo区
     }
     MPI_Finalize();
     return 0; 
