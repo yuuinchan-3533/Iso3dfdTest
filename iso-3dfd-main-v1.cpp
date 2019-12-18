@@ -124,9 +124,11 @@ int main(int argc, char* argv[]){
                 for (int j=HALF_LENGTH/2;j<y_size-HALF_LENGTH/2;j++){
 	                prev[k*z_size*y_size + j*y_size + i] = vel[k*z_size*y_size + j*y_size + i];
                     vel[k*z_size*y_size + j*y_size + i] = next[k*z_size*y_size + j*y_size + i];
+		printf("%f\n",vel[k*z_size*y_size+j*y_size+i]);
                 }   
             }
         }
+	
         int upkey=calculateBegin*z_size*y_size + HALF_LENGTH/2*y_size + HALF_LENGTH/2;
         int downkey=(calculateBegin - 4)*z_size*y_size + HALF_LENGTH/2*y_size + calculateBegin - 4;
         
