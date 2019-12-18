@@ -152,16 +152,19 @@ printf("%s,%d\n",__FILE__,__LINE__);
             }
 
 printf("%s,%d\n",__FILE__,__LINE__);
-            int upkey = haloSize * z_size * y_size + HALF_LENGTH  * y_size + HALF_LENGTH;
-            int downkey = (haloSize + blockSize ) * z_size * y_size + HALF_LENGTH * y_size + HALF_LENGTH;
+           
+            int sendhalo1pos = haloSize * z_size * y_size + HALF_LENGTH  * y_size + HALF_LENGTH;
+            int recvhalo2pos = (haloSize + blockSize ) * z_size * y_size + HALF_LENGTH * y_size + HALF_LENGTH;
+            int sendhalo2pos = blockSize * z_size * y_size + HALF_LENGTH * y_size + HALF_LENGTH;
+            int recvhalo1pos = HALF_LENGTH  * y_size + HALF_LENGTH;
 
             printf("开始更新halo区");
             //更新pre进程的下halo区,更新now进程的上halo区
 printf("%s,%d\n",__FILE__,__LINE__);
-            MPI_Sendrecv(&vel[upkey],  haloSize * x_size * y_size, MPI_FLOAT, up, 1, &vel[upkey], haloSize * x_size * y_size, MPI_FLOAT, down, 1, MPI_COMM_WORLD, &status);
+            MPI_Sendrecv(&vel[sendhalo1pos],  haloSize * x_size * y_size, MPI_FLOAT, up, 1, &vel[recvhalo2pos], haloSize * x_size * y_size, MPI_FLOAT, down, 1, MPI_COMM_WORLD, &status);
 
             //更新now进程的下halo区,更新next进程的上halo区
-            MPI_Sendrecv(&vel[downkey], haloSize * x_size * y_size, MPI_FLOAT, down, 1, &vel[downkey], haloSize * x_size * y_size, MPI_FLOAT, up, 1, MPI_COMM_WORLD, &status); //上halo区
+            MPI_Sendrecv(&vel[sendhalo2pos], haloSize * x_size * y_size, MPI_FLOAT, down, 1, &vel[recvhalo1pos], haloSize * x_size * y_size, MPI_FLOAT, up, 1, MPI_COMM_WORLD, &status); //上halo区
 printf("%s,%d\n",__FILE__,__LINE__);
             step++;
     }
