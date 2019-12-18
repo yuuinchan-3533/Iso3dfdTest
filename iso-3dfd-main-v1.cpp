@@ -158,10 +158,10 @@ printf("%s,%d\n",__FILE__,__LINE__);
             printf("开始更新halo区");
             //更新pre进程的下halo区,更新now进程的上halo区
 printf("%s,%d\n",__FILE__,__LINE__);
-            MPI_Sendrecv(&vel[upkey],  haloSize * x_size * y_size, MPI_FLOAT, up, 1, &vel[upkey], haloSize * x_size * y_size, MPI_FLOAT, down, 2, MPI_COMM_WORLD, &status);
+            MPI_Sendrecv(&vel[upkey],  haloSize * x_size * y_size, MPI_FLOAT, up, 1, &vel[upkey], haloSize * x_size * y_size, MPI_FLOAT, down, 1, MPI_COMM_WORLD, &status);
 
             //更新now进程的下halo区,更新next进程的上halo区
-            MPI_Sendrecv(&vel[downkey], haloSize * x_size * y_size, MPI_FLOAT, down, 1, &vel[downkey], haloSize * x_size * y_size, MPI_FLOAT, up, 2, MPI_COMM_WORLD, &status); //上halo区
+            MPI_Sendrecv(&vel[downkey], haloSize * x_size * y_size, MPI_FLOAT, down, 1, &vel[downkey], haloSize * x_size * y_size, MPI_FLOAT, up, 1, MPI_COMM_WORLD, &status); //上halo区
 printf("%s,%d\n",__FILE__,__LINE__);
             step++;
     }
