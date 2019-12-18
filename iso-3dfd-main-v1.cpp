@@ -88,7 +88,7 @@ int main(int argc, char* argv[]){
     initialize(prev,vel,next,x_size,y_size,z_size);
     
     if(rank<nthread){
-        calculateBegin=HALF_LENGTH/2+k*blockSize;
+        int calculateBegin=HALF_LENGTH+k*blockSize;
         if(rank==0){
             up=MPI_PROC_NULL;
             down=k+1;
