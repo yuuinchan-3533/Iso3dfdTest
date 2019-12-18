@@ -32,7 +32,7 @@ int main(int argc, char* argv[]){
     int kbegin,kend;
     blockSize=floor(z_size/nthread);//z方向上的分量
     haloSize=HALF_LENGTH;
-    int status;
+    MPI_Status status;
     x_size=300;
     y_size=300;
     z_size=256;
@@ -131,11 +131,11 @@ int main(int argc, char* argv[]){
         int downkey=(calculateBegin - 4)*z_size*y_size + HALF_LENGTH/2*y_size + calculateBegin - 4;
         
         //更新pre进程的下halo区,更新now进程的上halo区
-        status=MPI_SENDRECV(vel[upkey],4*x_size*y_size,MPI_FLOAT,up,1,vel[upkey],4*x_size*y_size,MPI_FLOAT,down,1,MPI_COMM_WORLD);
+        MPI_Sendrecv(&vel[upkey],4*x_size*y_size,MPI_FLOAT,up,1,&vel[upkey],4*x_size*y_size,MPI_FLOAT,down,1,MPI_COMM_WORLD,&status);
       
 
         //更新now进程的下halo区,更新next进程的上halo区
-        status=MPI_SENDRECV(vel[downkey],4*x_size*y_size,MPI_FLOAT,down,1,vel[downkey],4*x_size*y_size,MPI_FLOAT,down,1,MPI_COMM_WORLD);//上halo区
+        MPI_Sendrecv(&vel[downkey],4*x_size*y_size,MPI_FLOAT,down,1,&vel[downkey],4*x_size*y_size,MPI_FLOAT,down,1,MPI_COMM_WORLD,&status);//上halo区
     }
     MPI_Finalize();
     return 0; 
