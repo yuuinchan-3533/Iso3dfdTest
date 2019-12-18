@@ -30,7 +30,7 @@ int main(int argc, char* argv[]){
     int k;
     int up,down;
     int kbegin,kend;
-    blockSize=floor(z_size/nthread);//z方向上的分量
+    
     haloSize=HALF_LENGTH;
     MPI_Status status;
     x_size=300;
@@ -52,6 +52,7 @@ int main(int argc, char* argv[]){
   	if( argc >= 5){
     		nthread = atoi(argv[4]);
     }
+    blockSize=floor(z_size/nthread);//z方向上的分量
     totalSize=x_size*y_size*z_size;
     
     float *prev = (float*)_mm_malloc( (totalSize+16+MASK_ALLOC_OFFSET(0 ))*sizeof(float), CACHELINE_BYTES);
