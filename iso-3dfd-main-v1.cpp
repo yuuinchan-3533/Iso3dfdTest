@@ -3,7 +3,8 @@
 #include<mpi.h>
 
 
-
+#define MASK_ALLOC_OFFSET(x) (x)
+#define CACHELINE_BYTES   64
 int rank, pSize; //rank：当前进程ID，pSize：总的进程数
 
 
@@ -83,8 +84,8 @@ int main(int argc, char* argv[]){
     MPI_Comm_size(MPI_COMM_WORLD,&pSize);//获取进程总数
 
      //（数据，数据大小，根进程编号，通讯域）将root进程的数据广播到所有其它的进程
-    MPI_Bcast(COEFF, HALF_LENGTH+1, MPI_FLOAT, 0, MPI_COMM_WORLD);//（数据，数据大小，根进程编号，通讯域）
-    initialize(pre_p,vel_p,next_p,x_size,y_size,z_size);
+    MPI_Bcast(coeff, HALF_LENGTH+1, MPI_FLOAT, 0, MPI_COMM_WORLD);//（数据，数据大小，根进程编号，通讯域）
+    initialize(prev,vel,next,x_size,y_size,z_size);
     
     if(rank<nthread){
         calculateBegin=HALF_LENGTH/2+k*blockSize;
