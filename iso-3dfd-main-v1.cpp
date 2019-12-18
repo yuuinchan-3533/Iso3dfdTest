@@ -5,6 +5,7 @@
 
 #define MASK_ALLOC_OFFSET(x) (x)
 #define CACHELINE_BYTES   64
+#define INTERATION 100
 int rank, pSize; //rank：当前进程ID，pSize：总的进程数
 
 
@@ -30,6 +31,7 @@ int main(int argc, char* argv[]){
     int k;
     int up,down;
     int kbegin,kend;
+    int step;
     
     haloSize=HALF_LENGTH;
     MPI_Status status;
@@ -54,7 +56,7 @@ int main(int argc, char* argv[]){
     }
     blockSize=floor(z_size/nthread);//z方向上的分量
     totalSize=x_size*y_size*z_size;
-    
+    print("x_size:%d,y_size:%d,z_size:%d,nthread:%d\n",x_size,y_size,z_size,nthread);
     float *prev = (float*)_mm_malloc( (totalSize+16+MASK_ALLOC_OFFSET(0 ))*sizeof(float), CACHELINE_BYTES);
   	float *vel = (float*)_mm_malloc( (totalSize+16+MASK_ALLOC_OFFSET(16))*sizeof(float), CACHELINE_BYTES);
   	float *next  = (float*)_mm_malloc( (totalSize+16+MASK_ALLOC_OFFSET(32))*sizeof(float), CACHELINE_BYTES);
@@ -80,6 +82,7 @@ int main(int argc, char* argv[]){
 #  error "HALF_LENGTH not implemented"
 #endif
 
+    print("1.进行mpi初始化");
     MPI_Init(&argc,&argv);//MPI初始化语句
     MPI_Comm_rank(MPI_COMM_WORLD,&rank);//获取当前进程的pID
     MPI_Comm_size(MPI_COMM_WORLD,&pSize);//获取进程总数
@@ -87,7 +90,8 @@ int main(int argc, char* argv[]){
      //（数据，数据大小，根进程编号，通讯域）将root进程的数据广播到所有其它的进程
     MPI_Bcast(coeff, HALF_LENGTH+1, MPI_FLOAT, 0, MPI_COMM_WORLD);//（数据，数据大小，根进程编号，通讯域）
     initialize(prev,vel,next,x_size,y_size,z_size);
-    
+    step=0;
+    while(step<ITERATION){
     if(rank<nthread){
         int calculateBegin=HALF_LENGTH+k*blockSize;
         if(rank==0){
@@ -102,7 +106,7 @@ int main(int argc, char* argv[]){
             up=k-1;
             down=k+1;
         }
-
+	printf("2.开始迭代计算");
         for(int k=calculateBegin;k<calculateBegin+blockSize;k++){
             for(int i=HALF_LENGTH/2;i<x_size-HALF_LENGTH/2;i++){
                 for (int j=HALF_LENGTH/2;j<y_size-HALF_LENGTH/2;j++){
@@ -119,11 +123,11 @@ int main(int argc, char* argv[]){
                 }   
             }
         }
-
+	printf("3.开始赋值计算");
         for(int k=calculateBegin;k<calculateBegin+blockSize;k++){
             for(int i=HALF_LENGTH/2;i<x_size-HALF_LENGTH/2;i++){
                 for (int j=HALF_LENGTH/2;j<y_size-HALF_LENGTH/2;j++){
-	                prev[k*z_size*y_size + j*y_size + i] = vel[k*z_size*y_size + j*y_size + i];
+	            prev[k*z_size*y_size + j*y_size + i] = vel[k*z_size*y_size + j*y_size + i];
                     vel[k*z_size*y_size + j*y_size + i] = next[k*z_size*y_size + j*y_size + i];
 		printf("%f\n",vel[k*z_size*y_size+j*y_size+i]);
                 }   
@@ -133,12 +137,15 @@ int main(int argc, char* argv[]){
         int upkey=calculateBegin*z_size*y_size + HALF_LENGTH/2*y_size + HALF_LENGTH/2;
         int downkey=(calculateBegin - 4)*z_size*y_size + HALF_LENGTH/2*y_size + calculateBegin - 4;
         
+	printf("开始更新halo区");
         //更新pre进程的下halo区,更新now进程的上halo区
         MPI_Sendrecv(&vel[upkey],4*x_size*y_size,MPI_FLOAT,up,1,&vel[upkey],4*x_size*y_size,MPI_FLOAT,down,1,MPI_COMM_WORLD,&status);
       
 
         //更新now进程的下halo区,更新next进程的上halo区
         MPI_Sendrecv(&vel[downkey],4*x_size*y_size,MPI_FLOAT,down,1,&vel[downkey],4*x_size*y_size,MPI_FLOAT,down,1,MPI_COMM_WORLD,&status);//上halo区
+	step++;
+    }
     }
     MPI_Finalize();
     return 0; 
