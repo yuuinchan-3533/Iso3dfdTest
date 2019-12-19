@@ -102,21 +102,26 @@ printf("%s,%d\n",__FILE__,__LINE__);
     while (step < ITERATION)
     {
             int calculateBegin = HALF_LENGTH + k * blockSize;
-            if (rank == 0)
-            {
-                up = MPI_PROC_NULL;
-                down = k + 1;
-            } //根进程
-            else if (k == nthread - 1)
-            {
-                up = k - 1;
-                down = MPI_PROC_NULL;
-            }
-            else
-            {
-                up = k - 1;
-                down = k + 1;
-            }
+	up=rank - 1;
+        down = rank + 1;
+ 	if(up==-1)up=MPI_PROC_NULL;
+ 	if(down==nthread)down=MPI_PROC_NULL;
+	
+//            if (rank == 0)
+//            {
+//                up = MPI_PROC_NULL;
+//                down = k + 1;
+//            } //根进程
+//            else if (k == nthread - 1)
+//            {
+//                up = k - 1;
+//                down = MPI_PROC_NULL;
+//            }
+//            else
+//            {
+//                up = k - 1;
+//                down = k + 1;
+//            }
             printf("2.开始迭代计算");
             for (int k = haloSize; k < haloSize + blockSize; k++)
             {
@@ -161,6 +166,14 @@ printf("%s,%d\n",__FILE__,__LINE__);
             printf("开始更新halo区");
             //更新pre进程的下halo区,更新now进程的上halo区
 printf("%s,%d\n",__FILE__,__LINE__);
+
+if(rank==0)printf("rank 0 send:%d,%d,%d\n",sendhalo1pos,haloSize * x_size * y_size,up);
+if(rank==0)printf("rank 0 recv:%d,%d,%d\n",recvhalo2pos,haloSize * x_size * y_size,down);
+
+if(rank==1)printf("rank 1 send:%d,%d,%d\n",sendhalo1pos,haloSize * x_size * y_size,up);
+if(rank==1)printf("rank 1 recv:%d,%d,%d\n",recvhalo2pos,haloSize * x_size * y_size,down);
+
+
             MPI_Sendrecv(&vel[sendhalo1pos],  haloSize * x_size * y_size, MPI_FLOAT, up, 1, &vel[recvhalo2pos], haloSize * x_size * y_size, MPI_FLOAT, down, 1, MPI_COMM_WORLD, &status);
 
             //更新now进程的下halo区,更新next进程的上halo区
