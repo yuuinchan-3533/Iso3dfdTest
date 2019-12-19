@@ -7,9 +7,10 @@
 #define ITERATION 100
 int rank, pSize; //rank：当前进程ID，pSize：总的进程数
 
-void initialize(float *ptr_prev, float *ptr_vel, float *ptr_next, int x_size, int y_size, int blockSize,int haloSize){
-    int z_size = haloSize+blockSize+haloSize;
-    for (int k = 0; k < haloSize+blockSize+haloSize; k++)
+void initialize(float *ptr_prev, float *ptr_vel, float *ptr_next, int x_size, int y_size, int blockSize, int haloSize)
+{
+    int z_size = haloSize + blockSize + haloSize;
+    for (int k = 0; k < haloSize + blockSize + haloSize; k++)
     {
         for (int j = 0; j < y_size; j++)
         {
@@ -21,7 +22,6 @@ void initialize(float *ptr_prev, float *ptr_vel, float *ptr_next, int x_size, in
             }
         }
     }
-
 }
 
 int main(int argc, char *argv[])
@@ -36,7 +36,7 @@ int main(int argc, char *argv[])
     int up, down;
     int kbegin, kend;
     int step;
-printf("%s,%d\n",__FILE__,__LINE__);
+    printf("%s,%d\n", __FILE__, __LINE__);
     MPI_Init(&argc, &argv);                //MPI初始化语句
     MPI_Comm_rank(MPI_COMM_WORLD, &rank);  //获取当前进程的pID
     MPI_Comm_size(MPI_COMM_WORLD, &pSize); //获取进程总数
@@ -65,7 +65,7 @@ printf("%s,%d\n",__FILE__,__LINE__);
         nthread = atoi(argv[4]);
     }
     blockSize = floor(z_size / nthread); //z方向上的分量
-    totalSize = x_size * y_size * (haloSize+blockSize+haloSize);
+    totalSize = x_size * y_size * (haloSize + blockSize + haloSize);
     printf("x_size:%d,y_size:%d,z_size:%d,nthread:%d\n", x_size, y_size, z_size, nthread);
     float *prev = (float *)_mm_malloc((totalSize + 16 + MASK_ALLOC_OFFSET(0)) * sizeof(float), CACHELINE_BYTES);
     float *vel = (float *)_mm_malloc((totalSize + 16 + MASK_ALLOC_OFFSET(16)) * sizeof(float), CACHELINE_BYTES);
@@ -94,92 +94,97 @@ printf("%s,%d\n",__FILE__,__LINE__);
 
     printf("1.进行mpi初始化");
 
-printf("%s,%d\n",__FILE__,__LINE__);
+    printf("%s,%d\n", __FILE__, __LINE__);
     //（数据，数据大小，根进程编号，通讯域）将root进程的数据广播到所有其它的进程
     //MPI_Bcast(coeff, HALF_LENGTH + 1, MPI_FLOAT, 0, MPI_COMM_WORLD); //（数据，数据大小，根进程编号，通讯域）
-    initialize(prev, vel, next, x_size, y_size, blockSize,haloSize);
+    initialize(prev, vel, next, x_size, y_size, blockSize, haloSize);
     step = 0;
     while (step < ITERATION)
     {
-            int calculateBegin = HALF_LENGTH + k * blockSize;
-	up=rank - 1;
+        int calculateBegin = HALF_LENGTH + k * blockSize;
+        up = rank - 1;
         down = rank + 1;
- 	if(up==-1)up=MPI_PROC_NULL;
- 	if(down==nthread)down=MPI_PROC_NULL;
-	
-//            if (rank == 0)
-//            {
-//                up = MPI_PROC_NULL;
-//                down = k + 1;
-//            } //根进程
-//            else if (k == nthread - 1)
-//            {
-//                up = k - 1;
-//                down = MPI_PROC_NULL;
-//            }
-//            else
-//            {
-//                up = k - 1;
-//                down = k + 1;
-//            }
-            printf("2.开始迭代计算");
-            for (int k = haloSize; k < haloSize + blockSize; k++)
-            {
-                for (int i = HALF_LENGTH ; i < x_size - HALF_LENGTH ; i++)
-                {
-                    for (int j = HALF_LENGTH ; j < y_size - HALF_LENGTH ; j++)
-                    {
-                        float res = prev[k * z_size * y_size + j * y_size + i] * coeff[0];
+        if (up == -1)
+            up = MPI_PROC_NULL;
+        if (down == nthread)
+            down = MPI_PROC_NULL;
 
-                        for (int ir = 1; ir <= HALF_LENGTH; ir++)
-                        {
-                            res += coeff[ir] * (prev[(k + ir) * z_size * y_size + j * y_size + i] + prev[(k - ir) * z_size * y_size + j * y_size + i]); // horizontal
-                            res += coeff[ir] * (prev[k * z_size * y_size + (j + ir) * y_size + i] + prev[k * z_size * y_size + (j - ir) * y_size + i]); // vertical
-                            res += coeff[ir] * (prev[k * z_size * y_size + j * y_size + i + ir] + prev[k * z_size * y_size + j * y_size + i - ir]);     // in front / behind
-                        }
-                        next[k * z_size * y_size + j * y_size + i] = 2.0f * prev[k * z_size * y_size + j * y_size + i] - next[k * z_size * y_size + j * y_size + i] + res * vel[k * z_size * y_size + j * y_size + i];
+        //            if (rank == 0)
+        //            {
+        //                up = MPI_PROC_NULL;
+        //                down = k + 1;
+        //            } //根进程
+        //            else if (k == nthread - 1)
+        //            {
+        //                up = k - 1;
+        //                down = MPI_PROC_NULL;
+        //            }
+        //            else
+        //            {
+        //                up = k - 1;
+        //                down = k + 1;
+        //            }
+        printf("2.开始迭代计算");
+        for (int k = haloSize; k < haloSize + blockSize; k++)
+        {
+            for (int i = HALF_LENGTH; i < x_size - HALF_LENGTH; i++)
+            {
+                for (int j = HALF_LENGTH; j < y_size - HALF_LENGTH; j++)
+                {
+                    float res = prev[k * z_size * y_size + j * y_size + i] * coeff[0];
+
+                    for (int ir = 1; ir <= HALF_LENGTH; ir++)
+                    {
+                        res += coeff[ir] * (prev[(k + ir) * z_size * y_size + j * y_size + i] + prev[(k - ir) * z_size * y_size + j * y_size + i]); // horizontal
+                        res += coeff[ir] * (prev[k * z_size * y_size + (j + ir) * y_size + i] + prev[k * z_size * y_size + (j - ir) * y_size + i]); // vertical
+                        res += coeff[ir] * (prev[k * z_size * y_size + j * y_size + i + ir] + prev[k * z_size * y_size + j * y_size + i - ir]);     // in front / behind
                     }
+                    next[k * z_size * y_size + j * y_size + i] = 2.0f * prev[k * z_size * y_size + j * y_size + i] - next[k * z_size * y_size + j * y_size + i] + res * vel[k * z_size * y_size + j * y_size + i];
                 }
             }
-            printf("3.开始赋值计算");
-printf("%s,%d\n",__FILE__,__LINE__);
-            for (int k = haloSize; k < haloSize + blockSize; k++)
+        }
+        printf("3.开始赋值计算");
+        printf("%s,%d\n", __FILE__, __LINE__);
+        for (int k = haloSize; k < haloSize + blockSize; k++)
+        {
+            for (int i = HALF_LENGTH; i < x_size - HALF_LENGTH; i++)
             {
-                for (int i = HALF_LENGTH ; i < x_size - HALF_LENGTH ; i++)
+                for (int j = HALF_LENGTH; j < y_size - HALF_LENGTH; j++)
                 {
-                    for (int j = HALF_LENGTH ; j < y_size - HALF_LENGTH ; j++)
-                    {
-                        prev[k * z_size * y_size + j * y_size + i] = vel[k * z_size * y_size + j * y_size + i];
-                        vel[k * z_size * y_size + j * y_size + i] = next[k * z_size * y_size + j * y_size + i];
-                        //printf("%f\n", vel[k * z_size * y_size + j * y_size + i]);
-                    }
+                    prev[k * z_size * y_size + j * y_size + i] = vel[k * z_size * y_size + j * y_size + i];
+                    vel[k * z_size * y_size + j * y_size + i] = next[k * z_size * y_size + j * y_size + i];
+                    //printf("%f\n", vel[k * z_size * y_size + j * y_size + i]);
                 }
             }
+        }
 
-printf("%s,%d\n",__FILE__,__LINE__);
-           
-            int sendhalo1pos = haloSize * z_size * y_size + HALF_LENGTH  * y_size + HALF_LENGTH;
-            int recvhalo2pos = (haloSize + blockSize ) * z_size * y_size + HALF_LENGTH * y_size + HALF_LENGTH;
-            int sendhalo2pos = blockSize * z_size * y_size + HALF_LENGTH * y_size + HALF_LENGTH;
-            int recvhalo1pos = HALF_LENGTH  * y_size + HALF_LENGTH;
+        printf("%s,%d\n", __FILE__, __LINE__);
 
-            printf("开始更新halo区");
-            //更新pre进程的下halo区,更新now进程的上halo区
-printf("%s,%d\n",__FILE__,__LINE__);
+        int sendhalo1pos = haloSize * z_size * y_size + HALF_LENGTH * y_size + HALF_LENGTH;
+        int recvhalo2pos = (haloSize + blockSize) * z_size * y_size + HALF_LENGTH * y_size + HALF_LENGTH;
+        int sendhalo2pos = blockSize * z_size * y_size + HALF_LENGTH * y_size + HALF_LENGTH;
+        int recvhalo1pos = HALF_LENGTH * y_size + HALF_LENGTH;
 
-if(rank==0)printf("rank 0 send:%d,%d,%d\n",sendhalo1pos,haloSize * x_size * y_size,up);
-if(rank==0)printf("rank 0 recv:%d,%d,%d\n",recvhalo2pos,haloSize * x_size * y_size,down);
+        printf("开始更新halo区");
+        //更新pre进程的下halo区,更新now进程的上halo区
+        printf("%s,%d\n", __FILE__, __LINE__);
 
-if(rank==1)printf("rank 1 send:%d,%d,%d\n",sendhalo1pos,haloSize * x_size * y_size,up);
-if(rank==1)printf("rank 1 recv:%d,%d,%d\n",recvhalo2pos,haloSize * x_size * y_size,down);
+        if (rank == 0)
+            printf("rank 0 send:%d,%d,%d\n", sendhalo1pos, haloSize * x_size * y_size, up);
+        if (rank == 0)
+            printf("rank 0 recv:%d,%d,%d\n", recvhalo2pos, haloSize * x_size * y_size, down);
 
+        if (rank == 1)
+            printf("rank 1 send:%d,%d,%d\n", sendhalo1pos, haloSize * x_size * y_size, up);
+        if (rank == 1)
+            printf("rank 1 recv:%d,%d,%d\n", recvhalo2pos, haloSize * x_size * y_size, down);
 
-            MPI_Sendrecv(&vel[sendhalo1pos],  haloSize * x_size * y_size, MPI_FLOAT, up, 1, &vel[recvhalo2pos], haloSize * x_size * y_size, MPI_FLOAT, down, 1, MPI_COMM_WORLD, &status);
+        MPI_Sendrecv(&vel[sendhalo1pos], haloSize * x_size * y_size, MPI_FLOAT, up, 1, &vel[recvhalo2pos], haloSize * x_size * y_size, MPI_FLOAT, down, 1, MPI_COMM_WORLD, &status);
 
-            //更新now进程的下halo区,更新next进程的上halo区
-            MPI_Sendrecv(&vel[sendhalo2pos], haloSize * x_size * y_size, MPI_FLOAT, down, 1, &vel[recvhalo1pos], haloSize * x_size * y_size, MPI_FLOAT, up, 1, MPI_COMM_WORLD, &status); //上halo区
-printf("%s,%d\n",__FILE__,__LINE__);
-            step++;
+        //更新now进程的下halo区,更新next进程的上halo区
+        MPI_Sendrecv(&vel[sendhalo2pos], haloSize * x_size * y_size, MPI_FLOAT, down, 1, &vel[recvhalo1pos], haloSize * x_size * y_size, MPI_FLOAT, up, 1, MPI_COMM_WORLD, &status); //上halo区
+        printf("%s,%d\n", __FILE__, __LINE__);
+        step++;
     }
     MPI_Finalize();
     return 0;
