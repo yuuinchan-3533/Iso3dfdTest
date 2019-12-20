@@ -16,9 +16,9 @@ void initialize(float *ptr_prev, float *ptr_vel, float *ptr_next, int x_size, in
         {
             for (int i = 0; i < x_size; i++)
             {
-                ptr_prev[z_size * y_size * k + y_size * j + i] = sin(k * 100 + j * 10 + i);
-                ptr_vel[z_size * y_size * k + y_size * j + i] = cos(k * 100 + j * 10 + i);
-                ptr_next[z_size * y_size * k + y_size * j + i] = 0.00;
+                ptr_prev[x_size * y_size * k + x_size * j + i] = sin(k * 100 + j * 10 + i);
+                ptr_vel[x_size * y_size * k + x_size * j + i] = 2250000.0f*DT*DT;
+                ptr_next[x_size * y_size * k + x_size * j + i] = cos(i*100+j*10+i);
             }
         }
     }
