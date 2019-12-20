@@ -16,10 +16,10 @@ void initialize(float *ptr_prev, float *ptr_vel, float *ptr_next, int x_size, in
         {
             for (int i = 0; i < x_size; i++)
             {   int key=x_size * y_size * k + x_size * j + i;
-                ptr_prev[x_size * y_size * k + x_size * j + i] = sin(k * 100 + j * 10 + i);
+                ptr_prev[x_size * y_size * k + x_size * j + i] = 0.5;
                 ptr_vel[x_size * y_size * k + x_size * j + i] = 2250000.0f * DT * DT;
-                ptr_next[x_size * y_size * k + x_size * j + i] = cos(i * 100 + j * 10 + i);
-                printf("%f %f %f\n",ptr_prev[key],ptr_vel[key],ptr_next[key]);
+                ptr_next[x_size * y_size * k + x_size * j + i] = 0.8;
+                //printf("%f %f %f\n",ptr_prev[key],ptr_vel[key],ptr_next[key]);
             }
         }
     }
@@ -35,12 +35,12 @@ void outputMatrix(float *prt_vel, int haloSize, int blockSize, int x_size, int y
             for (int i = HALF_LENGTH; i < x_size - HALF_LENGTH; i++)
             {
 
-                //prt_vel[k * z_size * y_size + j * y_size + i] = next[k * z_size * y_size + j * y_size + i];
-                //printf("%f ", prt_vel[k * x_size * y_size + j * x_size + i]);
+                //prt_vel[k * x_size * y_size + j * x_size + i] = next[k * z_size * y_size + j * y_size + i];
+                printf("%f ", prt_vel[k * x_size * y_size + j * x_size + i]);
             }
-            //printf("\n");
+            printf("\n");
         }
-        //printf("\n");
+        printf("\n");
     }
     //fclose(stdout);
 }
