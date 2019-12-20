@@ -4,7 +4,7 @@
 
 #define MASK_ALLOC_OFFSET(x) (x)
 #define CACHELINE_BYTES 64
-#define ITERATION 100
+#define ITERATION 2
 int rank, pSize; //rank：当前进程ID，pSize：总的进程数
 
 void initialize(float *ptr_prev, float *ptr_vel, float *ptr_next, int x_size, int y_size, int blockSize, int haloSize)
@@ -26,7 +26,7 @@ void initialize(float *ptr_prev, float *ptr_vel, float *ptr_next, int x_size, in
 
 void outputMatrix(float *prt_vel, int haloSize, int blockSize, int x_size, int y_size, int z_size)
 {
-    freopen("matrix.out", "w", stdout);
+    //freopen("matrix.out", "w", stdout);
     for (int k = haloSize; k < haloSize + blockSize; k++)
     {
         for (int j = HALF_LENGTH; j < y_size - HALF_LENGTH; j++)
@@ -35,13 +35,13 @@ void outputMatrix(float *prt_vel, int haloSize, int blockSize, int x_size, int y
             {
 
                 //prt_vel[k * z_size * y_size + j * y_size + i] = next[k * z_size * y_size + j * y_size + i];
-                printf("%f ", prt_vel[k * z_size * y_size + j * y_size + i]);
+                //printf("%f ", prt_vel[k * x_size * y_size + j * x_size + i]);
             }
-            printf("\n");
+            //printf("\n");
         }
-        printf("\n");
+        //printf("\n");
     }
-    fclose(stdout);
+    //fclose(stdout);
 }
 
 int main(int argc, char *argv[])
@@ -86,7 +86,7 @@ int main(int argc, char *argv[])
     }
     blockSize = floor(z_size / nthread); //z方向上的分量
     totalSize = x_size * y_size * (haloSize + blockSize + haloSize);
-    printf("x_size:%d,y_size:%d,z_size:%d,nthread:%d\n", x_size, y_size, z_size, nthread);
+    //printf("x_size:%d,y_size:%d,z_size:%d,nthread:%d\n", x_size, y_size, z_size, nthread);
     float *prev = (float *)_mm_malloc((totalSize + 16 + MASK_ALLOC_OFFSET(0)) * sizeof(float), CACHELINE_BYTES);
     float *vel = (float *)_mm_malloc((totalSize + 16 + MASK_ALLOC_OFFSET(16)) * sizeof(float), CACHELINE_BYTES);
     float *next = (float *)_mm_malloc((totalSize + 16 + MASK_ALLOC_OFFSET(32)) * sizeof(float), CACHELINE_BYTES);
