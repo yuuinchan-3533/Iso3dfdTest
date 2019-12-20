@@ -17,8 +17,8 @@ void initialize(float *ptr_prev, float *ptr_vel, float *ptr_next, int x_size, in
             for (int i = 0; i < x_size; i++)
             {
                 ptr_prev[x_size * y_size * k + x_size * j + i] = sin(k * 100 + j * 10 + i);
-                ptr_vel[x_size * y_size * k + x_size * j + i] = 2250000.0f*DT*DT;
-                ptr_next[x_size * y_size * k + x_size * j + i] = cos(i*100+j*10+i);
+                ptr_vel[x_size * y_size * k + x_size * j + i] = 2250000.0f * DT * DT;
+                ptr_next[x_size * y_size * k + x_size * j + i] = cos(i * 100 + j * 10 + i);
             }
         }
     }
@@ -29,9 +29,9 @@ void outputMatrix(float *prt_vel, int haloSize, int blockSize, int x_size, int y
     freopen("matrix.out", "w", stdout);
     for (int k = haloSize; k < haloSize + blockSize; k++)
     {
-        for (int i = HALF_LENGTH; i < x_size - HALF_LENGTH; i++)
+        for (int j = HALF_LENGTH; j < y_size - HALF_LENGTH; j++)
         {
-            for (int j = HALF_LENGTH; j < y_size - HALF_LENGTH; j++)
+            for (int i = HALF_LENGTH; i < x_size - HALF_LENGTH; i++)
             {
 
                 //prt_vel[k * z_size * y_size + j * y_size + i] = next[k * z_size * y_size + j * y_size + i];
@@ -152,19 +152,19 @@ int main(int argc, char *argv[])
         printf("2.开始迭代计算");
         for (int k = haloSize; k < haloSize + blockSize; k++)
         {
-            for (int i = HALF_LENGTH; i < x_size - HALF_LENGTH; i++)
+            for (int j = HALF_LENGTH; j < y_size - HALF_LENGTH; j++)
             {
-                for (int j = HALF_LENGTH; j < y_size - HALF_LENGTH; j++)
+                for (int i = HALF_LENGTH; i < x_size - HALF_LENGTH; i++)
                 {
-                    float res = prev[k * z_size * y_size + j * y_size + i] * coeff[0];
+                    float res = prev[k * x_size * y_size + j * x_size + i] * coeff[0];
 
                     for (int ir = 1; ir <= HALF_LENGTH; ir++)
                     {
-                        res += coeff[ir] * (prev[(k + ir) * z_size * y_size + j * y_size + i] + prev[(k - ir) * z_size * y_size + j * y_size + i]); // horizontal
-                        res += coeff[ir] * (prev[k * z_size * y_size + (j + ir) * y_size + i] + prev[k * z_size * y_size + (j - ir) * y_size + i]); // vertical
-                        res += coeff[ir] * (prev[k * z_size * y_size + j * y_size + i + ir] + prev[k * z_size * y_size + j * y_size + i - ir]);     // in front / behind
+                        res += coeff[ir] * (prev[(k + ir) * x_size * y_size + j * x_size + i] + prev[(k - ir) * x_size * y_size + j * x_size + i]); // horizontal
+                        res += coeff[ir] * (prev[k * x_size * y_size + (j + ir) * x_size + i] + prev[k * x_size * y_size + (j - ir) * x_size + i]); // vertical
+                        res += coeff[ir] * (prev[k * x_size * y_size + j * x_size + i + ir] + prev[k * x_size * y_size + j * x_size + i - ir]);     // in front / behind
                     }
-                    next[k * z_size * y_size + j * y_size + i] = 2.0f * prev[k * z_size * y_size + j * y_size + i] - next[k * z_size * y_size + j * y_size + i] + res * vel[k * z_size * y_size + j * y_size + i];
+                    next[k * x_size * y_size + j * x_size + i] = 2.0f * prev[k * x_size * y_size + j * x_size + i] - next[k * x_size * y_size + j * x_size + i] + res * vel[k * x_size * y_size + j * x_size + i];
                 }
             }
         }
@@ -172,23 +172,23 @@ int main(int argc, char *argv[])
         printf("%s,%d\n", __FILE__, __LINE__);
         for (int k = haloSize; k < haloSize + blockSize; k++)
         {
-            for (int i = HALF_LENGTH; i < x_size - HALF_LENGTH; i++)
+            for (int j = HALF_LENGTH; j < y_size - HALF_LENGTH; j++)
             {
-                for (int j = HALF_LENGTH; j < y_size - HALF_LENGTH; j++)
+                for (int i = HALF_LENGTH; i < x_size - HALF_LENGTH; i++)
                 {
-                    prev[k * z_size * y_size + j * y_size + i] = vel[k * z_size * y_size + j * y_size + i];
-                    vel[k * z_size * y_size + j * y_size + i] = next[k * z_size * y_size + j * y_size + i];
-                    printf("%f\n", vel[k * z_size * y_size + j * y_size + i]);
+                    prev[k * x_size * y_size + j * x_size + i] = vel[k * x_size * y_size + j * x_size + i];
+                    vel[k * x_size * y_size + j * x_size + i] = next[k * x_size * y_size + j * x_size + i];
+                    printf("%f\n", vel[k * x_size * y_size + j * x_size + i]);
                 }
             }
         }
 
         printf("%s,%d\n", __FILE__, __LINE__);
 
-        int sendhalo1pos = haloSize * z_size * y_size + HALF_LENGTH * y_size + HALF_LENGTH;
-        int recvhalo2pos = (haloSize + blockSize) * z_size * y_size + HALF_LENGTH * y_size + HALF_LENGTH;
-        int sendhalo2pos = blockSize * z_size * y_size + HALF_LENGTH * y_size + HALF_LENGTH;
-        int recvhalo1pos = HALF_LENGTH * y_size + HALF_LENGTH;
+        int sendhalo1pos = haloSize * x_size * y_size + HALF_LENGTH * x_size + HALF_LENGTH;
+        int recvhalo2pos = (haloSize + blockSize) * x_size * y_size + HALF_LENGTH * x_size + HALF_LENGTH;
+        int sendhalo2pos = blockSize * x_size * y_size + HALF_LENGTH * x_size + HALF_LENGTH;
+        int recvhalo1pos = HALF_LENGTH * x_size + HALF_LENGTH;
 
         printf("开始更新halo区");
         //更新pre进程的下halo区,更新now进程的上halo区
