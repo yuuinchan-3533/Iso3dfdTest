@@ -24,6 +24,26 @@ void initialize(float *ptr_prev, float *ptr_vel, float *ptr_next, int x_size, in
     }
 }
 
+void outputMatrix(float *prt_vel, int haloSize,int blockSize,int x_size,int y_size,int z_size)
+{
+	freopen("matrix.out", "w", stdout);
+    for (int k = haloSize; k < haloSize + blockSize; k++)
+        {
+            for (int i = HALF_LENGTH; i < x_size - HALF_LENGTH; i++)
+            {
+                for (int j = HALF_LENGTH; j < y_size - HALF_LENGTH; j++)
+                {
+                    
+                    //prt_vel[k * z_size * y_size + j * y_size + i] = next[k * z_size * y_size + j * y_size + i];
+                    printf("%f ", prt_vel[k * z_size * y_size + j * y_size + i]);
+                }
+                printf("\n");
+            }
+            printf("\n");
+        }
+	fclose(stdout);
+}
+
 int main(int argc, char *argv[])
 {
 
@@ -186,6 +206,7 @@ int main(int argc, char *argv[])
         printf("%s,%d\n", __FILE__, __LINE__);
         step++;
     }
+    outputMatrix(vel,haloSize,blockSize,x_size,y_size,z_size);
     MPI_Finalize();
     return 0;
 }
