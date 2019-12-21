@@ -57,7 +57,7 @@ int main(int argc, char *argv[])
     int up, down;
     int kbegin, kend;
     int step;
-    printf("%s,%d\n", __FILE__, __LINE__);
+//    printf("%s,%d\n", __FILE__, __LINE__);
     MPI_Init(&argc, &argv);                //MPI初始化语句
     MPI_Comm_rank(MPI_COMM_WORLD, &rank);  //获取当前进程的pID
     MPI_Comm_size(MPI_COMM_WORLD, &pSize); //获取进程总数
