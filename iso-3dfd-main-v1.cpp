@@ -178,8 +178,10 @@ int main(int argc, char *argv[])
             {
                 for (int i = HALF_LENGTH; i < x_size - HALF_LENGTH; i++)
                 {
-                    prev[k * x_size * y_size + j * x_size + i] = vel[k * x_size * y_size + j * x_size + i];
-                    vel[k * x_size * y_size + j * x_size + i] = next[k * x_size * y_size + j * x_size + i];
+                    vel[k * x_size * y_size + j * x_size + i] = prev[k * x_size * y_size + j * x_size + i];
+                    prev[k * x_size * y_size + j * x_size + i] = next[k * x_size * y_size + j * x_size + i];
+                    next[k * x_size * y_size + j * x_size + i] = vel[k * x_size * y_size + j * x_size + i];
+                    vel[k * x_size * y_size + j * x_size + i] = 2250000.0f * DT * DT;
                     //printf("%f\n", vel[k * x_size * y_size + j * x_size + i]);
                 }
             }
