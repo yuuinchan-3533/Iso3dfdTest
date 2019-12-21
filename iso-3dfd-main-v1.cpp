@@ -4,7 +4,7 @@
 
 #define MASK_ALLOC_OFFSET(x) (x)
 #define CACHELINE_BYTES 64
-#define ITERATION 2
+#define ITERATION 4
 int rank, pSize; //rank：当前进程ID，pSize：总的进程数
 
 void initialize(float *ptr_prev, float *ptr_vel, float *ptr_next, int x_size, int y_size, int blockSize, int haloSize)
@@ -127,6 +127,7 @@ int main(int argc, char *argv[])
     step = 0;
     while (step < ITERATION)
     {
+	printf("%d %d\n\n",step,rank);
         int calculateBegin = HALF_LENGTH + k * blockSize;
         up = rank - 1;
         down = rank + 1;
