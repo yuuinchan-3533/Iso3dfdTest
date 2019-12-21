@@ -166,6 +166,7 @@ int main(int argc, char *argv[])
                         res += coeff[ir] * (prev[k * x_size * y_size + j * x_size + i + ir] + prev[k * x_size * y_size + j * x_size + i - ir]);     // in front / behind
                     }
                     next[k * x_size * y_size + j * x_size + i] = 2.0f * prev[k * x_size * y_size + j * x_size + i] - next[k * x_size * y_size + j * x_size + i] + res * vel[k * x_size * y_size + j * x_size + i];
+                    printf("(%d %d %d):next:%f prev:%f res:%f vel:%f \n",i,j,k,next[k * x_size * y_size + j * x_size + i],prev[k * x_size * y_size + j * x_size + i],res,vel[k * x_size * y_size + j * x_size + i]);
                 }
             }
         }
@@ -212,7 +213,7 @@ int main(int argc, char *argv[])
         //printf("%s,%d\n", __FILE__, __LINE__);
         step++;
     }
-    outputMatrix(vel, haloSize, blockSize, x_size, y_size, z_size);
+    //outputMatrix(vel, haloSize, blockSize, x_size, y_size, z_size);
     MPI_Finalize();
     return 0;
 }
