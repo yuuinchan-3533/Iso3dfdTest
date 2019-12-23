@@ -68,6 +68,18 @@ void initialize_mpi(float* ptr_prev,float* ptr_next, float* ptr_vel,Parameters* 
 
     }
 }
+void output(Parameters* p,int blockSize,int rank){
+	for(int z=HALF_LENGTH;z<HALF_LENGTH+blockSize;z++){
+        for(int y=0;y<p->n2;y++){
+            for(int x=0;x<p->n1;x++){
+                int offset=rank*(HALF_LENGTH+blockSize);
+                int key=(z+offset)*p->n1*p->n2+y*p->n1+x;
+				printf("rank:%d(%d %d %d):%f\n",rank,x,y,z+offset,p->prev[key]);              
+            }
+        }
+
+    }
+}
 void initialize(float* ptr_prev, float* ptr_next, float* ptr_vel, Parameters* p, size_t nbytes){
         memset(ptr_prev, 0.0f, nbytes);
         memset(ptr_next, 0.0f, nbytes);
@@ -158,7 +170,7 @@ int main(int argc, char** argv)
   	if ((p.n1_Tblock%16)!=0) {
     		printf("Parameter n1_Tblock=%d must be a multiple of 16\n",p.n1_Tblock);
     		exit(1);
-  	}
+  	} 
   	// Make sure nreps is rouded up to next even number (to support swap)
   	p.nreps = ((p.nreps+1)/2)*2;
 
@@ -262,6 +274,8 @@ int main(int argc, char** argv)
 		p.next=p.prev;
 		p.prev=temp;	
 	}
+	output(&p,blockSize,rank);
+	MPI_Finalize();
   	wstop =  walltime();
 
   	// report time

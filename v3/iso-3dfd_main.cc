@@ -76,6 +76,16 @@ void initialize(float* ptr_prev, float* ptr_next, float* ptr_vel, Parameters* p,
        }
 }
 
+void output(Parameters* p){
+	for(int i=0; i<p->n3; i++){
+                for(int j=0; j<p->n2; j++){
+                        for(int k=0; k<p->n1; k++){
+                                printf("rank:%d(%d %d %d):%f\n",0,k,j,i,p->prev[i*p->n1*p->n2 + j*p->n1 + k]);
+                        }
+                }
+        }
+}
+
 int main(int argc, char** argv)
 {
 	// Defaults
@@ -201,13 +211,14 @@ int main(int argc, char** argv)
 
 	initialize(p.prev, p.next, p.vel, &p, nbytes);
   	// A couple of run to start threading library
-  	int tmp_nreps = 2;
+  	int tmp_nreps = 100;
 
   	iso_3dfd(p.next, p.prev, p.vel, coeff, p.n1, p.n2, p.n3, p.num_threads, tmp_nreps, p.n1_Tblock, p.n2_Tblock, p.n3_Tblock);
+	output(&p);
+  	//wstart = walltime();
+  	//iso_3dfd(p.next, p.prev, p.vel, coeff, p.n1, p.n2, p.n3, p.num_threads, p.nreps, p.n1_Tblock, p.n2_Tblock, p.n3_Tblock);
 
-  	wstart = walltime();
-  	iso_3dfd(p.next, p.prev, p.vel, coeff, p.n1, p.n2, p.n3, p.num_threads, p.nreps, p.n1_Tblock, p.n2_Tblock, p.n3_Tblock);
-  	wstop =  walltime();
+  	//wstop =  walltime();
 
   	// report time
   	elapsed_time = wstop - wstart;
