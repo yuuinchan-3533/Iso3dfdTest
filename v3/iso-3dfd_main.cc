@@ -30,6 +30,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
+#include <math.h>
 
 #include "iso-3dfd.h"
 #include "tools.h"
@@ -56,24 +57,24 @@ void initialize(float* ptr_prev, float* ptr_next, float* ptr_vel, Parameters* p,
         for(int i=0; i<p->n3; i++){
                 for(int j=0; j<p->n2; j++){
                         for(int k=0; k<p->n1; k++){
-                                ptr_prev[i*p->n2*p->n1 + j*p->n1 + k] = 0.0f;
-                                ptr_next[i*p->n2*p->n1 + j*p->n1 + k] = 0.0f;
+                                ptr_prev[i*p->n2*p->n1 + j*p->n1 + k] = sin(i*100+j*10+k);
+                                ptr_next[i*p->n2*p->n1 + j*p->n1 + k] = cos(i*100+j*10+k);
                                 ptr_vel[i*p->n2*p->n1 + j*p->n1 + k] = 2250000.0f*DT*DT;//Integration of the v² and dt² here
                         }
                 }
         }
 	//Then we add a source
-        float val = 1.f;
-        for(int s=5; s>=0; s--){
-                for(int i=p->n3/2-s; i<p->n3/2+s;i++){
-                        for(int j=p->n2/4-s; j<p->n2/4+s;j++){
-                                for(int k=p->n1/4-s; k<p->n1/4+s;k++){
-                                        ptr_prev[i*p->n1*p->n2 + j*p->n1 + k] = val;
-                                }
-                        }
-                }
-                val *= 10;
-       }
+    //     float val = 1.f;
+    //     for(int s=5; s>=0; s--){
+    //             for(int i=p->n3/2-s; i<p->n3/2+s;i++){
+    //                     for(int j=p->n2/4-s; j<p->n2/4+s;j++){
+    //                             for(int k=p->n1/4-s; k<p->n1/4+s;k++){
+    //                                     ptr_prev[i*p->n1*p->n2 + j*p->n1 + k] = val;
+    //                             }
+    //                     }
+    //             }
+    //             val *= 10;
+    //    }
 }
 
 void output(Parameters* p){
