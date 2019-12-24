@@ -62,7 +62,8 @@ void initialize_mpi(float* ptr_prev,float* ptr_next, float* ptr_vel,Parameters* 
                 int key=z*p->n1*p->n2+y*p->n1+x;
                 ptr_prev[key]=sin((z+offset)*100+y*10+x);
                 ptr_next[key]=cos((z+offset)*100+y*10+x);
-		ptr_vel[key] = 2250000.0f*DT*DT;//Integration of the v² and dt² here
+				ptr_vel[key] = 2250000.0f*DT*DT;//Integration of the v² and dt² here
+				printf("(%d %d %d):%.3f %.3f\n",x,y,z+offset,ptr_prev[key],ptr_next[key]);
             }
         }
 
@@ -284,7 +285,7 @@ int main(int argc, char** argv)
 		p.next=p.prev;
 		p.prev=temp;	
 	}
-	output(&p,blockSize,rank);
+	//output(&p,blockSize,rank);
 	MPI_Finalize();
   	wstop =  walltime();
 
