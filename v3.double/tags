@@ -1,0 +1,62 @@
+!_TAG_FILE_FORMAT	2	/extended format; --format=1 will not append ;" to lines/
+!_TAG_FILE_SORTED	1	/0=unsorted, 1=sorted, 2=foldcase/
+!_TAG_PROGRAM_AUTHOR	Darren Hiebert	/dhiebert@users.sourceforge.net/
+!_TAG_PROGRAM_NAME	Exuberant Ctags	//
+!_TAG_PROGRAM_URL	http://ctags.sourceforge.net	/official site/
+!_TAG_PROGRAM_VERSION	5.8	//
+ALIGN_HALO_FACTOR	iso-3dfd.h	57;"	d
+CACHELINE_BYTES	iso-3dfd.h	52;"	d
+CEILING	iso-3dfd.h	70;"	d
+COBJS	Makefile	/^COBJS	= $(CSRCS:.cc=.o)$/;"	m
+CSRCS	Makefile	/^CSRCS	= $(wildcard *.cc)$/;"	m
+MASK_ALLOC_OFFSET	iso-3dfd.h	50;"	d
+MAX	iso-3dfd.h	68;"	d
+MIN	iso-3dfd.h	69;"	d
+N2_TBLOCK	iso-3dfd_main.cc	102;"	d	file:
+N2_TBLOCK	v3-main.cpp	126;"	d	file:
+N3_TBLOCK	iso-3dfd_main.cc	103;"	d	file:
+N3_TBLOCK	v3-main.cpp	127;"	d	file:
+OMP_N_THREADS	iso-3dfd.h	66;"	d
+OMP_SCHEDULE	iso-3dfd.h	62;"	d
+Parameters	iso-3dfd_main.cc	/^}Parameters; $/;"	t	typeref:struct:__anon1	file:
+Parameters	v3-main.cpp	/^}Parameters; $/;"	t	typeref:struct:__anon2	file:
+SPLIT_FD_LOOP	iso-3dfd.h	36;"	d
+_ISO_3DFD_INCLUDE	iso-3dfd.h	33;"	d
+_TOOLS_INCLUDE	tools.h	31;"	d
+init_data	tools.h	/^void init_data(double *data, const int dimx, const int dimy, const int dimz)$/;"	f
+initialize	iso-3dfd_main.cc	/^void initialize(double* ptr_prev, double* ptr_next, double* ptr_vel, Parameters* p, size_t nbytes){$/;"	f
+initialize	v3-main.cpp	/^void initialize(double* ptr_prev, double* ptr_next, double* ptr_vel, Parameters* p, size_t nbytes){$/;"	f
+initialize_mpi	v3-main.cpp	/^void initialize_mpi(double* ptr_prev,double* ptr_next, double* ptr_vel,Parameters* p,size_t nbytes,int blockSize,int rank){$/;"	f
+iso_3dfd	iso-3dfd_parallel.cc	/^void iso_3dfd(double *ptr_next,  double *ptr_prev,  double *ptr_vel,   double *coeff,$/;"	f
+iso_3dfd_it	iso-3dfd_parallel.cc	/^void iso_3dfd_it(double *ptr_next,  double *ptr_prev,  double *ptr_vel,   double *coeff,$/;"	f
+main	iso-3dfd_main.cc	/^int main(int argc, char** argv)$/;"	f
+main	v3-main.cpp	/^int main(int argc, char** argv)$/;"	f
+n1	iso-3dfd_main.cc	/^	size_t n1;   	\/\/ First dimension$/;"	m	struct:__anon1	file:
+n1	v3-main.cpp	/^	size_t n1;   	\/\/ First dimension$/;"	m	struct:__anon2	file:
+n1_Tblock	iso-3dfd_main.cc	/^	size_t n1_Tblock;	\/\/ Thread blocking on 1st dimension$/;"	m	struct:__anon1	file:
+n1_Tblock	v3-main.cpp	/^	size_t n1_Tblock;	\/\/ Thread blocking on 1st dimension$/;"	m	struct:__anon2	file:
+n2	iso-3dfd_main.cc	/^	size_t n2;   	\/\/ Second dimension$/;"	m	struct:__anon1	file:
+n2	v3-main.cpp	/^	size_t n2;   	\/\/ Second dimension$/;"	m	struct:__anon2	file:
+n2_Tblock	iso-3dfd_main.cc	/^	size_t n2_Tblock;	\/\/ Thread blocking on 2nd dimension$/;"	m	struct:__anon1	file:
+n2_Tblock	v3-main.cpp	/^	size_t n2_Tblock;	\/\/ Thread blocking on 2nd dimension$/;"	m	struct:__anon2	file:
+n3	iso-3dfd_main.cc	/^	size_t n3;   	\/\/ Third dimension$/;"	m	struct:__anon1	file:
+n3	v3-main.cpp	/^	size_t n3;   	\/\/ Third dimension$/;"	m	struct:__anon2	file:
+n3_Tblock	iso-3dfd_main.cc	/^	size_t n3_Tblock;	\/\/ Thread blocking on 3rd dimension$/;"	m	struct:__anon1	file:
+n3_Tblock	v3-main.cpp	/^	size_t n3_Tblock;	\/\/ Thread blocking on 3rd dimension$/;"	m	struct:__anon2	file:
+next	iso-3dfd_main.cc	/^	double *next;$/;"	m	struct:__anon1	file:
+next	v3-main.cpp	/^	double *next;$/;"	m	struct:__anon2	file:
+nreps	iso-3dfd_main.cc	/^	int nreps;     	\/\/ number of time-steps, over which performance is averaged$/;"	m	struct:__anon1	file:
+nreps	v3-main.cpp	/^	int nreps;     	\/\/ number of time-steps, over which performance is averaged$/;"	m	struct:__anon2	file:
+num_threads	iso-3dfd_main.cc	/^	int num_threads;$/;"	m	struct:__anon1	file:
+num_threads	v3-main.cpp	/^	int num_threads;$/;"	m	struct:__anon2	file:
+output	iso-3dfd_main.cc	/^void output(Parameters* p){$/;"	f
+output	v3-main.cpp	/^void output(Parameters* p,int blockSize,int rank){$/;"	f
+pSize	v3-main.cpp	/^int rank, pSize; \/\/rank：当前进程ID，pSize：总的进程数$/;"	v
+prev	iso-3dfd_main.cc	/^	double *prev;	$/;"	m	struct:__anon1	file:
+prev	v3-main.cpp	/^	double *prev;	$/;"	m	struct:__anon2	file:
+rank	v3-main.cpp	/^int rank, pSize; \/\/rank：当前进程ID，pSize：总的进程数$/;"	v
+reference_implementation	tools.h	/^void reference_implementation(double *next, double *prev, double *coeff, $/;"	f
+vel	iso-3dfd_main.cc	/^	double *vel;$/;"	m	struct:__anon1	file:
+vel	v3-main.cpp	/^	double *vel;$/;"	m	struct:__anon2	file:
+walltime	tools.h	/^double walltime() \/\/ seconds$/;"	f
+within_epsilon	tools.h	/^bool within_epsilon(double* output, double *reference, const int dimx, const int dimy, const int dimz, const int radius, const int zadjust=0, const double delta=0.0001f )$/;"	f

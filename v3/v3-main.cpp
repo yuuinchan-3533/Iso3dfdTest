@@ -59,27 +59,34 @@ void initialize_mpi(float* ptr_prev,float* ptr_next, float* ptr_vel,Parameters* 
         for(int y=0;y<p->n2;y++){
             for(int x=0;x<p->n1;x++){
                 int offset=rank*(HALF_LENGTH+blockSize);
-                int key=(z+offset)*p->n1*p->n2+y*p->n1+x;
+                int key=z*p->n1*p->n2+y*p->n1+x;
                 ptr_prev[key]=sin((z+offset)*100+y*10+x);
                 ptr_next[key]=cos((z+offset)*100+y*10+x);
-				ptr_vel[key] = 2250000.0f*DT*DT;//Integration of the v² and dt² here
+		ptr_vel[key] = 2250000.0f*DT*DT;//Integration of the v² and dt² here
             }
         }
 
     }
 }
 void output(Parameters* p,int blockSize,int rank){
-	printf("blockSize:%d,rank:%d,HALF_LENGTH:%d\n",blockSize,rank,HALF_LENGTH);
-	for(int z=HALF_LENGTH;z<HALF_LENGTH+blockSize;z++){
-        for(int y=0;y<p->n2;y++){
-            for(int x=0;x<p->n1;x++){
-                int offset=rank*(HALF_LENGTH+blockSize);
-                int key=(z+offset)*p->n1*p->n2+y*p->n1+x;
-		printf("rank:%d(%d %d %d):%f\n",rank,x,y,z+offset,p->prev[key]);              
-            }
-        }
-
-    }
+	for(int rk=0;rk<pSize;rk++)
+	{
+		fflush(stdout);
+		MPI_Barrier(MPI_COMM_WORLD);
+		if(rk==rank)
+		{
+			int offset=rank*(HALF_LENGTH+blockSize);
+			for(int z=HALF_LENGTH;z<HALF_LENGTH+blockSize;z++){
+				for(int y=0;y<p->n2;y++){
+					for(int x=0;x<p->n1;x++){
+						int key=z*p->n1*p->n2+y*p->n1+x;
+						//printf("rank:%d(%d %d %d):%f\n",rank,x,y,z+offset,p->prev[key]);              
+						printf("(%d %d %d):%.3f\n",x,y,z+offset,p->prev[key]);              
+					}
+				}
+			}
+		}
+	}
 }
 void initialize(float* ptr_prev, float* ptr_next, float* ptr_vel, Parameters* p, size_t nbytes){
         memset(ptr_prev, 0.0f, nbytes);
@@ -127,7 +134,7 @@ int main(int argc, char** argv)
 # define N2_TBLOCK 1   // Default thread blocking on 2nd dimension: 1
 # define N3_TBLOCK 124 // Default thread blocking on 3rd dimension: 124
 	int up, down; // 相邻进程编号
-    
+   	int blockSize; 
 
   
   	if( (argc > 1) && (argc < 4) ) {
@@ -180,7 +187,8 @@ int main(int argc, char** argv)
   	printf("n1=%d n2=%d n3=%d nreps=%d num_threads=%d HALF_LENGTH=%d\n",p.n1,p.n2,p.n3,p.nreps,p.num_threads,HALF_LENGTH);
   	printf("n1_thrd_block=%d n2_thrd_block=%d n3_thrd_block=%d\n", p.n1_Tblock, p.n2_Tblock, p.n3_Tblock);
 
-    int blockSize=ceil((p.n3-2*HALF_LENGTH)/(pSize+0.0));
+    	blockSize=ceil((p.n3-2*HALF_LENGTH)/(pSize+0.0));
+
 
 #if (HALF_LENGTH == 4)
         float coeff[HALF_LENGTH+1] = {
@@ -254,17 +262,18 @@ int main(int argc, char** argv)
     if (down == pSize)
         down = MPI_PROC_NULL;
 
-	if(rank=pSize-1){
-		blockSize=p.n3-(pSize-1)*blockSize;
+	if(rank==pSize-1){
+	    blockSize=(p.n3-2*HALF_LENGTH)-(pSize-1)*blockSize;
+
 	}
 	initialize_mpi(p.prev,p.next,p.vel,&p,2*HALF_LENGTH+blockSize,blockSize,rank);
   	wstart = walltime();
-	for(int step=0;step<p.nreps;step++){
+	for(int step=0;step</*p.nreps*/4;step++){
   		reference_implementation(p.next, p.prev, coeff, p.vel, p.n1, p.n2, p.n3, HALF_LENGTH );
 		int nowrecvup = 0;
 		int nowrecvdown = (blockSize+HALF_LENGTH)*p.n1*p.n2;
 		int nowsend2up = HALF_LENGTH*p.n1*p.n2;
-        int nowsend2down = blockSize*p.n1*p.n2;
+        	int nowsend2down = blockSize*p.n1*p.n2;
 		MPI_Sendrecv(&p.next[nowsend2up], HALF_LENGTH * p.n1 * p.n2, MPI_FLOAT, up, 1, &p.next[nowrecvdown], HALF_LENGTH * p.n1 * p.n2, MPI_FLOAT, down, 1, MPI_COMM_WORLD, &status);
 
         //更新now进程的下halo区,更新next进程的上halo区
@@ -275,7 +284,6 @@ int main(int argc, char** argv)
 		p.next=p.prev;
 		p.prev=temp;	
 	}
-	printf("pSize:%d,x:%d,y:%d,z:%d\n",pSize,p.n1,p.n2,p.n3);
 	output(&p,blockSize,rank);
 	MPI_Finalize();
   	wstop =  walltime();

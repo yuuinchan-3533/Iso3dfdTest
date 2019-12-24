@@ -44,13 +44,13 @@ typedef struct{
 	size_t n1_Tblock;	// Thread blocking on 1st dimension
 	size_t n2_Tblock;	// Thread blocking on 2nd dimension
 	size_t n3_Tblock;	// Thread blocking on 3rd dimension
-	float *prev;	
-	float *next;
-	float *vel;
+	double *prev;	
+	double *next;
+	double *vel;
 }Parameters; 
 
 //Function used for initialization
-void initialize(float* ptr_prev, float* ptr_next, float* ptr_vel, Parameters* p, size_t nbytes){
+void initialize(double* ptr_prev, double* ptr_next, double* ptr_vel, Parameters* p, size_t nbytes){
         memset(ptr_prev, 0.0f, nbytes);
         memset(ptr_next, 0.0f, nbytes);
         memset(ptr_vel, 1500.0f, nbytes);
@@ -64,7 +64,7 @@ void initialize(float* ptr_prev, float* ptr_next, float* ptr_vel, Parameters* p,
                 }
         }
 	//Then we add a source
-    //     float val = 1.f;
+    //     double val = 1.f;
     //     for(int s=5; s>=0; s--){
     //             for(int i=p->n3/2-s; i<p->n3/2+s;i++){
     //                     for(int j=p->n2/4-s; j<p->n2/4+s;j++){
@@ -157,7 +157,7 @@ int main(int argc, char** argv)
 
 
 #if (HALF_LENGTH == 4)
-        float coeff[HALF_LENGTH+1] = {
+        double coeff[HALF_LENGTH+1] = {
                         -2.847222222,
                         +1.6,
                         -0.2,
@@ -165,7 +165,7 @@ int main(int argc, char** argv)
 
                         -1.785714e-3};
 #elif (HALF_LENGTH == 8)
-        float coeff[HALF_LENGTH+1] = {
+        double coeff[HALF_LENGTH+1] = {
                         -3.0548446,
                         +1.7777778,
                         -3.1111111e-1,
@@ -191,17 +191,17 @@ int main(int argc, char** argv)
 
   	// variables for measuring performance
   	double wstart, wstop;
-  	float elapsed_time=0.0f, throughput_mpoints=0.0f, mflops=0.0f;
+  	double elapsed_time=0.0f, throughput_mpoints=0.0f, mflops=0.0f;
     
   	// allocate dat memory
   	size_t nsize = p.n1*p.n2*p.n3;
-  	size_t nbytes = nsize*sizeof(float);
+  	size_t nbytes = nsize*sizeof(double);
 
   	printf("allocating prev, next and vel: total %g Mbytes\n",(3.0*(nbytes+16))/(1024*1024));fflush(NULL);
 
-  	float *prev_base = (float*)_mm_malloc( (nsize+16+MASK_ALLOC_OFFSET(0 ))*sizeof(float), CACHELINE_BYTES);
-  	float *next_base = (float*)_mm_malloc( (nsize+16+MASK_ALLOC_OFFSET(16))*sizeof(float), CACHELINE_BYTES);
-  	float *vel_base  = (float*)_mm_malloc( (nsize+16+MASK_ALLOC_OFFSET(32))*sizeof(float), CACHELINE_BYTES);
+  	double *prev_base = (double*)_mm_malloc( (nsize+16+MASK_ALLOC_OFFSET(0 ))*sizeof(double), CACHELINE_BYTES);
+  	double *next_base = (double*)_mm_malloc( (nsize+16+MASK_ALLOC_OFFSET(16))*sizeof(double), CACHELINE_BYTES);
+  	double *vel_base  = (double*)_mm_malloc( (nsize+16+MASK_ALLOC_OFFSET(32))*sizeof(double), CACHELINE_BYTES);
 
   	if( prev_base==NULL || next_base==NULL || vel_base==NULL ){
     		printf("couldn't allocate CPU memory prev_base=%p next=_base%p vel_base=%p\n",prev_base, next_base, vel_base);
@@ -227,7 +227,7 @@ int main(int argc, char** argv)
 
   	// report time
   	elapsed_time = wstop - wstart;
-  	float normalized_time = elapsed_time/p.nreps;   
+  	double normalized_time = elapsed_time/p.nreps;   
   	throughput_mpoints = ((p.n1-2*HALF_LENGTH)*(p.n2-2*HALF_LENGTH)*(p.n3-2*HALF_LENGTH))/(normalized_time*1e6f);
   	mflops = (7.0f*HALF_LENGTH + 5.0f)* throughput_mpoints;
 
@@ -244,7 +244,7 @@ int main(int argc, char** argv)
         p.nreps=2;
   	iso_3dfd(p.next, p.prev, p.vel, coeff, p.n1, p.n2, p.n3, p.num_threads, p.nreps, p.n1_Tblock, p.n2_Tblock, p.n3_Tblock);
 
-        float *p_ref = (float*)malloc(p.n1*p.n2*p.n3*sizeof(float));
+        double *p_ref = (double*)malloc(p.n1*p.n2*p.n3*sizeof(double));
         if( p_ref==NULL ){
                 printf("couldn't allocate memory for p_ref\n");
                 printf("  TEST FAILED!\n"); fflush(NULL);
