@@ -60,7 +60,7 @@ void initialize(float* ptr_prev, float* ptr_next, float* ptr_vel, Parameters* p,
                                 ptr_prev[i*p->n2*p->n1 + j*p->n1 + k] = sin(i*100+j*10+k);
                                 ptr_next[i*p->n2*p->n1 + j*p->n1 + k] = cos(i*100+j*10+k);
                                 ptr_vel[i*p->n2*p->n1 + j*p->n1 + k] = 2250000.0f*DT*DT;//Integration of the v² and dt² here
-								printf("(%d %d %d):%.3f %.3f\n",k,j,i,ptr_prev[i*p->n2*p->n1 + j*p->n1 + k],ptr_next[i*p->n2*p->n1 + j*p->n1 + k]);
+				//printf("(%d %d %d):%.3f %.3f\n",k,j,i,ptr_prev[i*p->n2*p->n1 + j*p->n1 + k],ptr_next[i*p->n2*p->n1 + j*p->n1 + k]);
                         }
                 }
         }
@@ -159,7 +159,28 @@ int main(int argc, char** argv)
 
 #if (HALF_LENGTH == 4)
         float coeff[HALF_LENGTH+1] = {
-                        -2.847222222,
+                        -2.8472222e_implementation(float *next, float *prev, float *coeff,
+ 64                   float *vel,
+ 65                   const int n1, const int n2, const int n3, const int half_length){
+ 66   int n1n2 = n1*n2;
+ 67 
+ 68   for(int iz=0; iz<n3; iz++) {
+ 69     for(int iy=0; iy<n2; iy++) {
+ 70       for(int ix=0; ix<n1; ix++) {
+ 71         if( ix>=half_length && ix<(n1-half_length) && iy>=half_length && iy<(n2-half_length) && iz>=half_length && iz<(n3-half_length) ) {
+ 72           float res = prev[iz*n1n2 + iy*n1 + ix]*coeff[0];
+ 73           for(int ir=1; ir<=half_length; ir++) {
+ 74             res += coeff[ir] * (prev[iz*n1n2 + iy*n1 + ix+ir] + prev[iz*n1n2 + iy*n1 + ix-ir]);       // horizontal
+ 75             res += coeff[ir] * (prev[iz*n1n2 + iy*n1 + ix+ir*n1] + prev[iz*n1n2 + iy*n1 + ix-ir*n1]);   // vertical
+ 76             res += coeff[ir] * (prev[iz*n1n2 + iy*n1 + ix+ir*n1*n2] + prev[iz*n1n2 + iy*n1 + ix-ir*n1*n2]); // in front / behind
+ 77           }
+ 78           next[iz*n1n2 + iy*n1 +ix] = 2.0f* prev[iz*n1n2 + iy*n1 +ix] - next[iz*n1n2 + iy*n1 +ix] + res * vel[iz*n1n2 + iy*n1 +ix];
+ 79           //printf("(%d %d %d):prev:%.3f next:%.3f vel:%.3f\n",)
+ 80         }
+ 81       }
+ 82     }
+ 83   }
+ 84 }
                         +1.6,
                         -0.2,
                         +2.53968e-2,
@@ -220,7 +241,7 @@ int main(int argc, char** argv)
   	int tmp_nreps = 4;
 
   	iso_3dfd(p.next, p.prev, p.vel, coeff, p.n1, p.n2, p.n3, p.num_threads, tmp_nreps, p.n1_Tblock, p.n2_Tblock, p.n3_Tblock);
-	//output(&p);
+	output(&p);
   	//wstart = walltime();
   	//iso_3dfd(p.next, p.prev, p.vel, coeff, p.n1, p.n2, p.n3, p.num_threads, p.nreps, p.n1_Tblock, p.n2_Tblock, p.n3_Tblock);
 
