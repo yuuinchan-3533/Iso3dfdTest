@@ -69,12 +69,13 @@ void initialize_mpi(float* ptr_prev,float* ptr_next, float* ptr_vel,Parameters* 
     }
 }
 void output(Parameters* p,int blockSize,int rank){
+	printf("blockSize:%d,rank:%d,HALF_LENGTH:%d\n",blockSize,rank,HALF_LENGTH);
 	for(int z=HALF_LENGTH;z<HALF_LENGTH+blockSize;z++){
         for(int y=0;y<p->n2;y++){
             for(int x=0;x<p->n1;x++){
                 int offset=rank*(HALF_LENGTH+blockSize);
                 int key=(z+offset)*p->n1*p->n2+y*p->n1+x;
-				printf("rank:%d(%d %d %d):%f\n",rank,x,y,z+offset,p->prev[key]);              
+		printf("rank:%d(%d %d %d):%f\n",rank,x,y,z+offset,p->prev[key]);              
             }
         }
 
@@ -274,6 +275,7 @@ int main(int argc, char** argv)
 		p.next=p.prev;
 		p.prev=temp;	
 	}
+	printf("pSize:%d,x:%d,y:%d,z:%d\n",pSize,p.n1,p.n2,p.n3);
 	output(&p,blockSize,rank);
 	MPI_Finalize();
   	wstop =  walltime();
