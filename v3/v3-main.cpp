@@ -180,7 +180,7 @@ int main(int argc, char** argv)
   	printf("n1=%d n2=%d n3=%d nreps=%d num_threads=%d HALF_LENGTH=%d\n",p.n1,p.n2,p.n3,p.nreps,p.num_threads,HALF_LENGTH);
   	printf("n1_thrd_block=%d n2_thrd_block=%d n3_thrd_block=%d\n", p.n1_Tblock, p.n2_Tblock, p.n3_Tblock);
 
-    int blockSize=ceil((p.n3_Tblock-2*HALF_LENGTH)/(pSize+0.0));
+    int blockSize=ceil((p.n3-2*HALF_LENGTH)/(pSize+0.0));
 
 #if (HALF_LENGTH == 4)
         float coeff[HALF_LENGTH+1] = {
