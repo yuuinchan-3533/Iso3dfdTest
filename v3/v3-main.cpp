@@ -254,7 +254,7 @@ int main(int argc, char** argv)
         down = MPI_PROC_NULL;
 
 	if(rank=pSize-1){
-		blockSize=p->n3-(pSize-1)*blockSize;
+		blockSize=p.n3-(pSize-1)*blockSize;
 	}
 	initialize_mpi(p.prev,p.next,p.vel,&p,2*HALF_LENGTH+blockSize,blockSize,rank);
   	wstart = walltime();

@@ -47,7 +47,7 @@ double walltime() // seconds
 }
 
 
-#if defined(VERIFY_RESULTS)
+//#if defined(VERIFY_RESULTS)
 #include <math.h>
 void init_data(float *data, const int dimx, const int dimy, const int dimz)
 {
@@ -106,7 +106,7 @@ bool within_epsilon(float* output, float *reference, const int dimx, const int d
 }
 
 
-#endif /* VERIFY_RESULTS */
+//#endif /* VERIFY_RESULTS */
 
 
 #endif /*_TOOLS_INCLUDE */
