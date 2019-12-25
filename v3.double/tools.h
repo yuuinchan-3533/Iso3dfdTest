@@ -76,10 +76,33 @@ void reference_implementation(double *next, double *prev, double *coeff,
 	    res += coeff[ir] * (prev[iz*n1n2 + iy*n1 + ix+ir*n1*n2] + prev[iz*n1n2 + iy*n1 + ix-ir*n1*n2]); // in front / behind
 	  }
 	  next[iz*n1n2 + iy*n1 +ix] = 2.0f* prev[iz*n1n2 + iy*n1 +ix] - next[iz*n1n2 + iy*n1 +ix] + res * vel[iz*n1n2 + iy*n1 +ix];
+	  //
+	  //printf("(%d %d %d):prev:%.3f next:%.3f vel:%.3f\n",)
 	}
       }
     }
   }
+}
+
+void reference_implementation_mpi(double *next, double *prev, double *coeff,double *vel,const int n1, const int n2, const int n3, const int half_length, const int blockSize){
+    int n1n2 = n1*n2;
+  
+    for(int iz=half_length; iz<half_length+blockSize; iz++) {
+      for(int iy=0; iy<n2; iy++) {
+        for(int ix=0; ix<n1; ix++) {
+          if( ix>=half_length && ix<(n1-half_length) && iy>=half_length && iy<(n2-half_length)) {
+            double res = prev[iz*n1n2 + iy*n1 + ix]*coeff[0];
+            for(int ir=1; ir<=half_length; ir++) {
+              res += coeff[ir] * (prev[iz*n1n2 + iy*n1 + ix+ir] + prev[iz*n1n2 + iy*n1 + ix-ir]);       // horizontal
+              res += coeff[ir] * (prev[iz*n1n2 + iy*n1 + ix+ir*n1] + prev[iz*n1n2 + iy*n1 + ix-ir*n1]);   // vertical
+              res += coeff[ir] * (prev[iz*n1n2 + iy*n1 + ix+ir*n1*n2] + prev[iz*n1n2 + iy*n1 + ix-ir*n1*n2]); // in front / behind
+            }
+            next[iz*n1n2 + iy*n1 +ix] = 2.0f* prev[iz*n1n2 + iy*n1 +ix] - next[iz*n1n2 + iy*n1 +ix] + res * vel[iz*n1n2 + iy*n1 +ix];
+            //printf("(%d %d %d):prev:%.3f next:%.3f vel:%.3f\n",)
+          }
+        }
+      }
+    }   
 }
 
 bool within_epsilon(double* output, double *reference, const int dimx, const int dimy, const int dimz, const int radius, const int zadjust=0, const double delta=0.0001f )

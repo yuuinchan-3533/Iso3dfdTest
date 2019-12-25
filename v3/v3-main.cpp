@@ -285,6 +285,7 @@ int main(int argc, char** argv)
 		p.next=p.prev;
 		p.prev=temp;	
 	}
+	//printf("hhhhhhhhhhhhhhhhhhhhh");
 	output(&p,blockSize,rank);
 	MPI_Finalize();
   	wstop =  walltime();

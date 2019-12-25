@@ -19,13 +19,13 @@
  * ***************************************************************************/
 
 /*****************************************************************************
-! Content:
-! Implementation example of ISO-3DFD implementation for 
-!   Intel(R) Xeon Phi(TM) and Intel(R) Xeon.
-! Version 00
-! leonardo.borges@intel.com
-! cedric.andreolli@intel.com
-!****************************************************************************/
+  ! Content:
+  ! Implementation example of ISO-3DFD implementation for 
+  !   Intel(R) Xeon Phi(TM) and Intel(R) Xeon.
+  ! Version 00
+  ! leonardo.borges@intel.com
+  ! cedric.andreolli@intel.com
+  !****************************************************************************/
 
 #include <stdlib.h>
 #include <stdio.h>
@@ -51,45 +51,45 @@ typedef struct{
 
 //Function used for initialization
 void initialize(float* ptr_prev, float* ptr_next, float* ptr_vel, Parameters* p, size_t nbytes){
-        memset(ptr_prev, 0.0f, nbytes);
-        memset(ptr_next, 0.0f, nbytes);
-        memset(ptr_vel, 1500.0f, nbytes);
-        for(int i=0; i<p->n3; i++){
-                for(int j=0; j<p->n2; j++){
-                        for(int k=0; k<p->n1; k++){
-                                ptr_prev[i*p->n2*p->n1 + j*p->n1 + k] = sin(i*100+j*10+k);
-                                ptr_next[i*p->n2*p->n1 + j*p->n1 + k] = cos(i*100+j*10+k);
-                                ptr_vel[i*p->n2*p->n1 + j*p->n1 + k] = 2250000.0f*DT*DT;//Integration of the v² and dt² here
+	memset(ptr_prev, 0.0f, nbytes);
+	memset(ptr_next, 0.0f, nbytes);
+	memset(ptr_vel, 1500.0f, nbytes);
+	for(int i=0; i<p->n3; i++){
+		for(int j=0; j<p->n2; j++){
+			for(int k=0; k<p->n1; k++){
+				ptr_prev[i*p->n2*p->n1 + j*p->n1 + k] = sin(i*100+j*10+k);
+				ptr_next[i*p->n2*p->n1 + j*p->n1 + k] = cos(i*100+j*10+k);
+				ptr_vel[i*p->n2*p->n1 + j*p->n1 + k] = 2250000.0f*DT*DT;//Integration of the v² and dt² here
 				//printf("(%d %d %d):%.3f %.3f\n",k,j,i,ptr_prev[i*p->n2*p->n1 + j*p->n1 + k],ptr_next[i*p->n2*p->n1 + j*p->n1 + k]);
-                        }
-                }
-        }
+			}
+		}
+	}
 	//Then we add a source
-    //     float val = 1.f;
-    //     for(int s=5; s>=0; s--){
-    //             for(int i=p->n3/2-s; i<p->n3/2+s;i++){
-    //                     for(int j=p->n2/4-s; j<p->n2/4+s;j++){
-    //                             for(int k=p->n1/4-s; k<p->n1/4+s;k++){
-    //                                     ptr_prev[i*p->n1*p->n2 + j*p->n1 + k] = val;
-    //                             }
-    //                     }
-    //             }
-    //             val *= 10;
-    //    }
+	//     float val = 1.f;
+	//     for(int s=5; s>=0; s--){
+	//             for(int i=p->n3/2-s; i<p->n3/2+s;i++){
+	//                     for(int j=p->n2/4-s; j<p->n2/4+s;j++){
+	//                             for(int k=p->n1/4-s; k<p->n1/4+s;k++){
+	//                                     ptr_prev[i*p->n1*p->n2 + j*p->n1 + k] = val;
+	//                             }
+	//                     }
+	//             }
+	//             val *= 10;
+	//    }
 }
 
 void output(Parameters* p){
-//	for(int i=0; i<p->n3; i++){
-//                for(int j=0; j<p->n2; j++){
-//                        for(int k=0; k<p->n1; k++){
+	//	for(int i=0; i<p->n3; i++){
+	//                for(int j=0; j<p->n2; j++){
+	//                        for(int k=0; k<p->n1; k++){
 	for(int i=HALF_LENGTH; i<p->n3-HALF_LENGTH; i++){
-                for(int j=0; j<p->n2; j++){
-                        for(int k=0; k<p->n1; k++){
-                                //printf("rank:%d(%d %d %d):%f\n",0,k,j,i,p->prev[i*p->n1*p->n2 + j*p->n1 + k]);
-                                printf("(%d %d %d):%.3f\n",k,j,i,p->prev[i*p->n1*p->n2 + j*p->n1 + k]);
-                        }
-                }
-        }
+		for(int j=0; j<p->n2; j++){
+			for(int k=0; k<p->n1; k++){
+				//printf("rank:%d(%d %d %d):%f\n",0,k,j,i,p->prev[i*p->n1*p->n2 + j*p->n1 + k]);
+				printf("(%d %d %d):%.3f\n",k,j,i,p->prev[i*p->n1*p->n2 + j*p->n1 + k]);
+			}
+		}
+	}
 }
 
 int main(int argc, char** argv)
@@ -97,106 +97,84 @@ int main(int argc, char** argv)
 	// Defaults
 	Parameters p;
 	p.n1 = 256;   // First dimension
-  	p.n2 = 300;   // Second dimension
-  	p.n3 = 300;   // Third dimension
-  	p.num_threads = 24;
-  	p.nreps = 100;     // number of time-steps, over which performance is averaged
-  	p.n1_Tblock;       // Thread blocking on 1st dimension
-  	p.n2_Tblock;       // Thread blocking on 2nd dimension
-  	p.n3_Tblock;       // Thread blocking on 3rd dimension
+	p.n2 = 300;   // Second dimension
+	p.n3 = 300;   // Third dimension
+	p.num_threads = 24;
+	p.nreps = 100;     // number of time-steps, over which performance is averaged
+	p.n1_Tblock;       // Thread blocking on 1st dimension
+	p.n2_Tblock;       // Thread blocking on 2nd dimension
+	p.n3_Tblock;       // Thread blocking on 3rd dimension
 # define N2_TBLOCK 1   // Default thread blocking on 2nd dimension: 1
 # define N3_TBLOCK 124 // Default thread blocking on 3rd dimension: 124
-  
-  	if( (argc > 1) && (argc < 4) ) {
-    		printf(" usage: [n1 n2 n3] [# threads] [# iterations] [thread block n1] [thread block n2] [thread block n3]\n");
-    		exit(1);
-  	}
-  	// [n1 n2 n3]
-  	if( argc >= 4 ) {
-    		p.n1 = atoi(argv[1]);
-    		p.n2 = atoi(argv[2]);
-    		p.n3 = atoi(argv[3]);
-  	}
-  	//  [# threads]
-  	if( argc >= 5)
-    		p.num_threads = atoi(argv[4]);
-  	//  [# iterations]
-  	if( argc >= 6)
-    		p.nreps = atoi(argv[5]);
-  	//  [thread block n1] [thread block n2] [thread block n3]
-  	if( argc >= 7) {
-    		p.n1_Tblock = atoi(argv[6]);
-  	} else {
-    		p.n1_Tblock = p.n1; // Default: no blocking on 1st dim
-  	}
-  	if( argc >= 8) {
-    		p.n2_Tblock = atoi(argv[7]);
-  	} else {
-    		p.n2_Tblock =  N2_TBLOCK;
-  	}
-  	if( argc >= 9) {
-    		p.n3_Tblock = atoi(argv[8]);
-  	} else {
-    		p.n3_Tblock = N3_TBLOCK;
-  	}
-  
-  	// Make sure n1 and n1_Tblock are multiple of 16 (to support 64B alignment)
-  	if ((p.n1%16)!=0) {
-    		printf("Parameter n1=%d must be a multiple of 16\n",p.n1);
-    		exit(1);
-  	}
-  	if ((p.n1_Tblock%16)!=0) {
-    		printf("Parameter n1_Tblock=%d must be a multiple of 16\n",p.n1_Tblock);
-    		exit(1);
-  	}
-  	// Make sure nreps is rouded up to next even number (to support swap)
-  	p.nreps = ((p.nreps+1)/2)*2;
+
+	if( (argc > 1) && (argc < 4) ) {
+		printf(" usage: [n1 n2 n3] [# threads] [# iterations] [thread block n1] [thread block n2] [thread block n3]\n");
+		exit(1);
+	}
+	// [n1 n2 n3]
+	if( argc >= 4 ) {
+		p.n1 = atoi(argv[1]);
+		p.n2 = atoi(argv[2]);
+		p.n3 = atoi(argv[3]);
+	}
+	//  [# threads]
+	if( argc >= 5)
+		p.num_threads = atoi(argv[4]);
+	//  [# iterations]
+	if( argc >= 6)
+		p.nreps = atoi(argv[5]);
+	//  [thread block n1] [thread block n2] [thread block n3]
+	if( argc >= 7) {
+		p.n1_Tblock = atoi(argv[6]);
+	} else {
+		p.n1_Tblock = p.n1; // Default: no blocking on 1st dim
+	}
+	if( argc >= 8) {
+		p.n2_Tblock = atoi(argv[7]);
+	} else {
+		p.n2_Tblock =  N2_TBLOCK;
+	}
+	if( argc >= 9) {
+		p.n3_Tblock = atoi(argv[8]);
+	} else {
+		p.n3_Tblock = N3_TBLOCK;
+	}
+
+	// Make sure n1 and n1_Tblock are multiple of 16 (to support 64B alignment)
+	if ((p.n1%16)!=0) {
+		printf("Parameter n1=%d must be a multiple of 16\n",p.n1);
+		exit(1);
+	}
+	if ((p.n1_Tblock%16)!=0) {
+		printf("Parameter n1_Tblock=%d must be a multiple of 16\n",p.n1_Tblock);
+		exit(1);
+	}
+	// Make sure nreps is rouded up to next even number (to support swap)
+	p.nreps = ((p.nreps+1)/2)*2;
 
 
-  	printf("n1=%d n2=%d n3=%d nreps=%d num_threads=%d HALF_LENGTH=%d\n",p.n1,p.n2,p.n3,p.nreps,p.num_threads,HALF_LENGTH);
-  	printf("n1_thrd_block=%d n2_thrd_block=%d n3_thrd_block=%d\n", p.n1_Tblock, p.n2_Tblock, p.n3_Tblock);
+	printf("n1=%d n2=%d n3=%d nreps=%d num_threads=%d HALF_LENGTH=%d\n",p.n1,p.n2,p.n3,p.nreps,p.num_threads,HALF_LENGTH);
+	printf("n1_thrd_block=%d n2_thrd_block=%d n3_thrd_block=%d\n", p.n1_Tblock, p.n2_Tblock, p.n3_Tblock);
 
 
 #if (HALF_LENGTH == 4)
-        float coeff[HALF_LENGTH+1] = {
-                        -2.8472222e_implementation(float *next, float *prev, float *coeff,
- 64                   float *vel,
- 65                   const int n1, const int n2, const int n3, const int half_length){
- 66   int n1n2 = n1*n2;
- 67 
- 68   for(int iz=0; iz<n3; iz++) {
- 69     for(int iy=0; iy<n2; iy++) {
- 70       for(int ix=0; ix<n1; ix++) {
- 71         if( ix>=half_length && ix<(n1-half_length) && iy>=half_length && iy<(n2-half_length) && iz>=half_length && iz<(n3-half_length) ) {
- 72           float res = prev[iz*n1n2 + iy*n1 + ix]*coeff[0];
- 73           for(int ir=1; ir<=half_length; ir++) {
- 74             res += coeff[ir] * (prev[iz*n1n2 + iy*n1 + ix+ir] + prev[iz*n1n2 + iy*n1 + ix-ir]);       // horizontal
- 75             res += coeff[ir] * (prev[iz*n1n2 + iy*n1 + ix+ir*n1] + prev[iz*n1n2 + iy*n1 + ix-ir*n1]);   // vertical
- 76             res += coeff[ir] * (prev[iz*n1n2 + iy*n1 + ix+ir*n1*n2] + prev[iz*n1n2 + iy*n1 + ix-ir*n1*n2]); // in front / behind
- 77           }
- 78           next[iz*n1n2 + iy*n1 +ix] = 2.0f* prev[iz*n1n2 + iy*n1 +ix] - next[iz*n1n2 + iy*n1 +ix] + res * vel[iz*n1n2 + iy*n1 +ix];
- 79           //printf("(%d %d %d):prev:%.3f next:%.3f vel:%.3f\n",)
- 80         }
- 81       }
- 82     }
- 83   }
- 84 }
-                        +1.6,
-                        -0.2,
-                        +2.53968e-2,
-
-                        -1.785714e-3};
+	float coeff[HALF_LENGTH+1] = {
+		-2.8472222,
+		+1.6,
+			-0.2,
+			+2.53968e-2,
+			-1.785714e-3};
 #elif (HALF_LENGTH == 8)
-        float coeff[HALF_LENGTH+1] = {
-                        -3.0548446,
-                        +1.7777778,
-                        -3.1111111e-1,
-                        +7.572087e-2,
-                        -1.76767677e-2,
-                        +3.480962e-3,
-                        -5.180005e-4,
-                        +5.074287e-5,
-                        -2.42812e-6};
+	float coeff[HALF_LENGTH+1] = {
+		-3.0548446,
+		+1.7777778,
+		-3.1111111e-1,
+		+7.572087e-2,
+		-1.76767677e-2,
+		+3.480962e-3,
+		-5.180005e-4,
+		+5.074287e-5,
+		-2.42812e-6};
 #else
 #  error "HALF_LENGTH not implemented"
 #endif
@@ -208,86 +186,86 @@ int main(int argc, char** argv)
 
 
 
-  	// Data Arrays
-  	p.prev=NULL, p.next=NULL, p.vel=NULL;
+	// Data Arrays
+	p.prev=NULL, p.next=NULL, p.vel=NULL;
 
-  	// variables for measuring performance
-  	double wstart, wstop;
-  	float elapsed_time=0.0f, throughput_mpoints=0.0f, mflops=0.0f;
-    
-  	// allocate dat memory
-  	size_t nsize = p.n1*p.n2*p.n3;
-  	size_t nbytes = nsize*sizeof(float);
+	// variables for measuring performance
+	double wstart, wstop;
+	float elapsed_time=0.0f, throughput_mpoints=0.0f, mflops=0.0f;
 
-  	printf("allocating prev, next and vel: total %g Mbytes\n",(3.0*(nbytes+16))/(1024*1024));fflush(NULL);
+	// allocate dat memory
+	size_t nsize = p.n1*p.n2*p.n3;
+	size_t nbytes = nsize*sizeof(float);
 
-  	float *prev_base = (float*)_mm_malloc( (nsize+16+MASK_ALLOC_OFFSET(0 ))*sizeof(float), CACHELINE_BYTES);
-  	float *next_base = (float*)_mm_malloc( (nsize+16+MASK_ALLOC_OFFSET(16))*sizeof(float), CACHELINE_BYTES);
-  	float *vel_base  = (float*)_mm_malloc( (nsize+16+MASK_ALLOC_OFFSET(32))*sizeof(float), CACHELINE_BYTES);
+	printf("allocating prev, next and vel: total %g Mbytes\n",(3.0*(nbytes+16))/(1024*1024));fflush(NULL);
 
-  	if( prev_base==NULL || next_base==NULL || vel_base==NULL ){
-    		printf("couldn't allocate CPU memory prev_base=%p next=_base%p vel_base=%p\n",prev_base, next_base, vel_base);
-    		printf("  TEST FAILED!\n"); fflush(NULL);
-    		exit(-1);
-  	}
+	float *prev_base = (float*)_mm_malloc( (nsize+16+MASK_ALLOC_OFFSET(0 ))*sizeof(float), CACHELINE_BYTES);
+	float *next_base = (float*)_mm_malloc( (nsize+16+MASK_ALLOC_OFFSET(16))*sizeof(float), CACHELINE_BYTES);
+	float *vel_base  = (float*)_mm_malloc( (nsize+16+MASK_ALLOC_OFFSET(32))*sizeof(float), CACHELINE_BYTES);
 
-  	// Align working vectors offsets 
-  	p.prev = &prev_base[16 +ALIGN_HALO_FACTOR +MASK_ALLOC_OFFSET(0 )];
-  	p.next = &next_base[16 +ALIGN_HALO_FACTOR +MASK_ALLOC_OFFSET(16)];
-  	p.vel  = &vel_base [16 +ALIGN_HALO_FACTOR +MASK_ALLOC_OFFSET(32)];
+	if( prev_base==NULL || next_base==NULL || vel_base==NULL ){
+		printf("couldn't allocate CPU memory prev_base=%p next=_base%p vel_base=%p\n",prev_base, next_base, vel_base);
+		printf("  TEST FAILED!\n"); fflush(NULL);
+		exit(-1);
+	}
+
+	// Align working vectors offsets 
+	p.prev = &prev_base[16 +ALIGN_HALO_FACTOR +MASK_ALLOC_OFFSET(0 )];
+	p.next = &next_base[16 +ALIGN_HALO_FACTOR +MASK_ALLOC_OFFSET(16)];
+	p.vel  = &vel_base [16 +ALIGN_HALO_FACTOR +MASK_ALLOC_OFFSET(32)];
 
 	initialize(p.prev, p.next, p.vel, &p, nbytes);
-  	// A couple of run to start threading library
-  	int tmp_nreps = 4;
+	// A couple of run to start threading library
+	int tmp_nreps = 4;
 
-  	iso_3dfd(p.next, p.prev, p.vel, coeff, p.n1, p.n2, p.n3, p.num_threads, tmp_nreps, p.n1_Tblock, p.n2_Tblock, p.n3_Tblock);
+	iso_3dfd(p.next, p.prev, p.vel, coeff, p.n1, p.n2, p.n3, p.num_threads, tmp_nreps, p.n1_Tblock, p.n2_Tblock, p.n3_Tblock);
 	output(&p);
-  	//wstart = walltime();
-  	//iso_3dfd(p.next, p.prev, p.vel, coeff, p.n1, p.n2, p.n3, p.num_threads, p.nreps, p.n1_Tblock, p.n2_Tblock, p.n3_Tblock);
+	//wstart = walltime();
+	//iso_3dfd(p.next, p.prev, p.vel, coeff, p.n1, p.n2, p.n3, p.num_threads, p.nreps, p.n1_Tblock, p.n2_Tblock, p.n3_Tblock);
 
-  	//wstop =  walltime();
+	//wstop =  walltime();
 
-  	// report time
-  	elapsed_time = wstop - wstart;
-  	float normalized_time = elapsed_time/p.nreps;   
-  	throughput_mpoints = ((p.n1-2*HALF_LENGTH)*(p.n2-2*HALF_LENGTH)*(p.n3-2*HALF_LENGTH))/(normalized_time*1e6f);
-  	mflops = (7.0f*HALF_LENGTH + 5.0f)* throughput_mpoints;
+	// report time
+	elapsed_time = wstop - wstart;
+	float normalized_time = elapsed_time/p.nreps;   
+	throughput_mpoints = ((p.n1-2*HALF_LENGTH)*(p.n2-2*HALF_LENGTH)*(p.n3-2*HALF_LENGTH))/(normalized_time*1e6f);
+	mflops = (7.0f*HALF_LENGTH + 5.0f)* throughput_mpoints;
 
-  	printf("-------------------------------\n");
-  	printf("time:       %8.2f sec\n", elapsed_time );
-  	printf("throughput: %8.2f MPoints/s\n", throughput_mpoints );
-  	printf("flops:      %8.2f GFlops\n", mflops/1e3f );
+	printf("-------------------------------\n");
+	printf("time:       %8.2f sec\n", elapsed_time );
+	printf("throughput: %8.2f MPoints/s\n", throughput_mpoints );
+	printf("flops:      %8.2f GFlops\n", mflops/1e3f );
 #if defined(VERIFY_RESULTS)
-        printf("\n-------------------------------\n");
-        printf("comparing one iteration to reference implementation result...\n");
+	printf("\n-------------------------------\n");
+	printf("comparing one iteration to reference implementation result...\n");
 
-        initialize(p.prev, p.next, p.vel, &p, nbytes);
+	initialize(p.prev, p.next, p.vel, &p, nbytes);
 
-        p.nreps=2;
-  	iso_3dfd(p.next, p.prev, p.vel, coeff, p.n1, p.n2, p.n3, p.num_threads, p.nreps, p.n1_Tblock, p.n2_Tblock, p.n3_Tblock);
+	p.nreps=2;
+	iso_3dfd(p.next, p.prev, p.vel, coeff, p.n1, p.n2, p.n3, p.num_threads, p.nreps, p.n1_Tblock, p.n2_Tblock, p.n3_Tblock);
 
-        float *p_ref = (float*)malloc(p.n1*p.n2*p.n3*sizeof(float));
-        if( p_ref==NULL ){
-                printf("couldn't allocate memory for p_ref\n");
-                printf("  TEST FAILED!\n"); fflush(NULL);
-                exit(-1);
-        }
+	float *p_ref = (float*)malloc(p.n1*p.n2*p.n3*sizeof(float));
+	if( p_ref==NULL ){
+		printf("couldn't allocate memory for p_ref\n");
+		printf("  TEST FAILED!\n"); fflush(NULL);
+		exit(-1);
+	}
 
-        initialize(p.prev, p_ref, p.vel, &p, nbytes);
+	initialize(p.prev, p_ref, p.vel, &p, nbytes);
 
-        reference_implementation( p_ref, p.prev, coeff, p.vel, p.n1, p.n2, p.n3, HALF_LENGTH );
-        if( within_epsilon( p.next, p_ref, p.n1, p.n2, p.n3, HALF_LENGTH, 0, 0.0001f ) ) {
-                printf("  Result within epsilon\n");
-                printf("  TEST PASSED!\n");
-        } else {
-                printf("  Incorrect result\n");
-                printf("  TEST FAILED!\n");
-        }
-        free(p_ref);
+	reference_implementation( p_ref, p.prev, coeff, p.vel, p.n1, p.n2, p.n3, HALF_LENGTH );
+	if( within_epsilon( p.next, p_ref, p.n1, p.n2, p.n3, HALF_LENGTH, 0, 0.0001f ) ) {
+		printf("  Result within epsilon\n");
+		printf("  TEST PASSED!\n");
+	} else {
+		printf("  Incorrect result\n");
+		printf("  TEST FAILED!\n");
+	}
+	free(p_ref);
 
 #endif /* VERIFY_RESULTS */
 
-  	_mm_free(prev_base);
-  	_mm_free(next_base);
-  	_mm_free(vel_base);
+	_mm_free(prev_base);
+	_mm_free(next_base);
+	_mm_free(vel_base);
 }

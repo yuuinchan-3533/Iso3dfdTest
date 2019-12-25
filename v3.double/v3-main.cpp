@@ -63,6 +63,7 @@ void initialize_mpi(double* ptr_prev,double* ptr_next, double* ptr_vel,Parameter
                 ptr_prev[key]=sin((z+offset)*100+y*10+x);
                 ptr_next[key]=cos((z+offset)*100+y*10+x);
 		ptr_vel[key] = 2250000.0f*DT*DT;//Integration of the v² and dt² here
+				//printf("(%d %d %d):%.3f %.3f\n",x,y,z+offset,ptr_prev[key],ptr_next[key]);
             }
         }
 
@@ -81,7 +82,7 @@ void output(Parameters* p,int blockSize,int rank){
 					for(int x=0;x<p->n1;x++){
 						int key=z*p->n1*p->n2+y*p->n1+x;
 						//printf("rank:%d(%d %d %d):%f\n",rank,x,y,z+offset,p->prev[key]);              
-						printf("(%d %d %d):%.3f\n",x,y,z+offset,p->prev[key]);              
+						printf("(%d %d %d):%.2f\n",x,y,z+offset,p->prev[key]);              
 					}
 				}
 			}
@@ -269,7 +270,7 @@ int main(int argc, char** argv)
 	initialize_mpi(p.prev,p.next,p.vel,&p,2*HALF_LENGTH+blockSize,blockSize,rank);
   	wstart = walltime();
 	for(int step=0;step</*p.nreps*/4;step++){
-  		reference_implementation(p.next, p.prev, coeff, p.vel, p.n1, p.n2, p.n3, HALF_LENGTH );
+  		reference_implementation_mpi(p.next, p.prev, coeff, p.vel, p.n1, p.n2, p.n3, HALF_LENGTH, blockSize);
 		int nowrecvup = 0;
 		int nowrecvdown = (blockSize+HALF_LENGTH)*p.n1*p.n2;
 		int nowsend2up = HALF_LENGTH*p.n1*p.n2;
@@ -284,6 +285,7 @@ int main(int argc, char** argv)
 		p.next=p.prev;
 		p.prev=temp;	
 	}
+	//printf("hhhhhhhhhhhhhhhhhhhhh");
 	output(&p,blockSize,rank);
 	MPI_Finalize();
   	wstop =  walltime();
