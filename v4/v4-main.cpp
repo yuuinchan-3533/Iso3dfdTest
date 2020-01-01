@@ -80,6 +80,32 @@ void output(Parameters *p, int blockSize, int rank)
 		}
 	}
 }
+void initialize(float* ptr_prev, float* ptr_next, float* ptr_vel, Parameters* p, size_t nbytes){
+        memset(ptr_prev, 0.0f, nbytes);
+        memset(ptr_next, 0.0f, nbytes);
+        memset(ptr_vel, 1500.0f, nbytes);
+        for(int i=0; i<p->n3; i++){
+                for(int j=0; j<p->n2; j++){
+                        for(int k=0; k<p->n1; k++){
+                                ptr_prev[i*p->n2*p->n1 + j*p->n1 + k] = 0.0f;
+                                ptr_next[i*p->n2*p->n1 + j*p->n1 + k] = 0.0f;
+                                ptr_vel[i*p->n2*p->n1 + j*p->n1 + k] = 2250000.0f*DT*DT;//Integration of the v² and dt² here
+                        }
+                }
+        }
+	//Then we add a source
+        float val = 1.f;
+        for(int s=5; s>=0; s--){
+                for(int i=p->n3/2-s; i<p->n3/2+s;i++){
+                        for(int j=p->n2/4-s; j<p->n2/4+s;j++){
+                                for(int k=p->n1/4-s; k<p->n1/4+s;k++){
+                                        ptr_prev[i*p->n1*p->n2 + j*p->n1 + k] = val;
+                                }
+                        }
+                }
+                val *= 10;
+       }
+}
 void initiate_mpi_x_y(float *ptr_prev, float *ptr_next, float *ptr_vel, Parameters *p, int processXBlockSize, int processYBlockSize, int rank)
 {
 	int xOffSet = (rank % xProcessNum) * xBlockSize;
@@ -101,12 +127,18 @@ void initiate_mpi_x_y(float *ptr_prev, float *ptr_next, float *ptr_vel, Paramete
 }
 void initiate_params(int n1,int n2){
 	int x,y;
+	float diff=n1>n2?(n1+0.0)/(n2+0.0):(n2+0.0)/(n1+0.0);
+	float minn=100000.0;
+	float tempdiff=0;
 	x=floor(sqrt(pSize));
 	for(int i=x;i>0;i--){
 		if(pSize%x==0){
-			xProcessNum=x;
-			yProcessNum=pSize/x;
-			break;
+			tempdiff=(pSize/x)/(x+0.0);
+			if(abs(tempdiff-diff)<minn){
+				minn=abs(tempdiff-diff);
+				xProcessNum=x;
+				yProcessNum=pSize/x;
+			}			
 		}
 	}
 	xBlockSize=ceil((n1- 2 * HALF_LENGTH)/(xProcessNum+0.0));
@@ -238,36 +270,6 @@ int main(int argc, char **argv)
 	double wstart, wstop;
 	float elapsed_time = 0.0f, throughput_mpoints = 0.0f, mflops = 0.0f;
 
-	// allocate dat memory
-	size_t nsize = p.n1 * p.n2 * p.n3;
-	size_t nsize_mpi = (HALF_LENGTH + xDivisionSize + HALF_LENGTH) * (HALF_LENGTH + yDivisionSize + HALF_LENGTH) * p.n3;
-	size_t nbytes = nsize * sizeof(float);
-
-	printf("allocating prev, next and vel: total %g Mbytes\n", (3.0 * (nbytes + 16)) / (1024 * 1024));
-	fflush(NULL);
-
-	float *prev_base = (float *)_mm_malloc((nsize + 16 + MASK_ALLOC_OFFSET(0)) * sizeof(float), CACHELINE_BYTES);
-	float *next_base = (float *)_mm_malloc((nsize + 16 + MASK_ALLOC_OFFSET(16)) * sizeof(float), CACHELINE_BYTES);
-	float *vel_base = (float *)_mm_malloc((nsize + 16 + MASK_ALLOC_OFFSET(32)) * sizeof(float), CACHELINE_BYTES);
-
-	if (prev_base == NULL || next_base == NULL || vel_base == NULL)
-	{
-		printf("couldn't allocate CPU memory prev_base=%p next=_base%p vel_base=%p\n", prev_base, next_base, vel_base);
-		printf("  TEST FAILED!\n");
-		fflush(NULL);
-		exit(-1);
-	}
-
-	// Align working vectors offsets
-	p.prev = &prev_base[16 + ALIGN_HALO_FACTOR + MASK_ALLOC_OFFSET(0)];
-	p.next = &next_base[16 + ALIGN_HALO_FACTOR + MASK_ALLOC_OFFSET(16)];
-	p.vel = &vel_base[16 + ALIGN_HALO_FACTOR + MASK_ALLOC_OFFSET(32)];
-
-	//initialize(p.prev, p.next, p.vel, &p, nbytes);
-	// A couple of run to start threading library
-	//int tmp_nreps = 2;
-
-	//iso_3dfd(p.next, p.prev, p.vel, coeff, p.n1, p.n2, p.n3, p.num_threads, tmp_nreps, p.n1_Tblock, p.n2_Tblock, p.n3_Tblock);
 
 	left = rank - 1;
 	right = rank + 1;
@@ -289,6 +291,37 @@ int main(int argc, char **argv)
 	{
 		down = MPI_PROC_NULL;
 	}
+	// allocate dat memory
+	size_t nsize = p.n1 * p.n2 * p.n3;
+	size_t nsize_mpi = (HALF_LENGTH + xDivisionSize + HALF_LENGTH) * (HALF_LENGTH + yDivisionSize + HALF_LENGTH) * p.n3;
+	size_t nbytes = nsize * sizeof(float);
+
+	printf("allocating prev, next and vel: total %g Mbytes\n", (3.0 * (nbytes + 16)) / (1024 * 1024));
+	fflush(NULL);
+
+	float *prev_base = (float *)_mm_malloc((nsize_mpi + 16 + MASK_ALLOC_OFFSET(0)) * sizeof(float), CACHELINE_BYTES);
+	float *next_base = (float *)_mm_malloc((nsize_mpi + 16 + MASK_ALLOC_OFFSET(16)) * sizeof(float), CACHELINE_BYTES);
+	float *vel_base = (float *)_mm_malloc((nsize_mpi + 16 + MASK_ALLOC_OFFSET(32)) * sizeof(float), CACHELINE_BYTES);
+
+	if (prev_base == NULL || next_base == NULL || vel_base == NULL)
+	{
+		printf("couldn't allocate CPU memory prev_base=%p next=_base%p vel_base=%p\n", prev_base, next_base, vel_base);
+		printf("  TEST FAILED!\n");
+		fflush(NULL);
+		exit(-1);
+	}
+
+	// Align working vectors offsets
+	p.prev = &prev_base[16 + ALIGN_HALO_FACTOR + MASK_ALLOC_OFFSET(0)];
+	p.next = &next_base[16 + ALIGN_HALO_FACTOR + MASK_ALLOC_OFFSET(16)];
+	p.vel = &vel_base[16 + ALIGN_HALO_FACTOR + MASK_ALLOC_OFFSET(32)];
+
+	//initialize(p.prev, p.next, p.vel, &p, nbytes);
+	// A couple of run to start threading library
+	//int tmp_nreps = 2;
+
+	//iso_3dfd(p.next, p.prev, p.vel, coeff, p.n1, p.n2, p.n3, p.num_threads, tmp_nreps, p.n1_Tblock, p.n2_Tblock, p.n3_Tblock);
+
 
 	initiate_mpi_x_y(p.prev, p.next, p.vel, &p, 2 * HALF_LENGTH + blockSize, blockSize, rank);
 	wstart = walltime();
