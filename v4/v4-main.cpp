@@ -99,6 +99,20 @@ void initiate_mpi_x_y(float *ptr_prev, float *ptr_next, float *ptr_vel, Paramete
 		}
 	}
 }
+void initiate_params(int n1,int n2){
+	int x,y;
+	x=floor(sqrt(pSize));
+	for(int i=x;i>0;i--){
+		if(pSize%x==0){
+			xProcessNum=x;
+			yProcessNum=pSize/x;
+			break;
+		}
+	}
+	xBlockSize=ceil((n1- 2 * HALF_LENGTH)/(xProcessNum+0.0));
+	yBlockSize=ceil((n2- 2 * HALF_LENGTH)/(yProcessNum+0.0));
+	return;
+}
 
 int main(int argc, char **argv)
 {
@@ -178,6 +192,8 @@ int main(int argc, char **argv)
 		printf("Parameter n1_Tblock=%d must be a multiple of 16\n", p.n1_Tblock);
 		exit(1);
 	}
+
+	initiate_params(p.n1,p.n2);
 	// Make sure nreps is rouded up to next even number (to support swap)
 	p.nreps = ((p.nreps + 1) / 2) * 2;
 
@@ -264,7 +280,7 @@ int main(int argc, char **argv)
 		down = MPI_PROC_NULL;
 		xDivisionSize = (p.n1 - 2 * HALF_LENGTH) - (xProcessNum - 1) * xBlockSize;
 	}
-	if (up >= pSize)
+	if (up >= pSize) 
 	{
 		up = MPI_PROC_NULL;
 		yDivisionSize = (p.n2 - 2 * HALF_LENGTH) - (yProcessNum - 1) * yBlockSize;
@@ -280,17 +296,30 @@ int main(int argc, char **argv)
 	{
 		reference_implementation_mpi(p.next, p.prev, coeff, p.vel, p.n1, p.n2, p.n3, HALF_LENGTH, blockSize);
 		MPI_Type_vector(yDivisionSize, HALF_LENGTH, HALF_LENGTH + xDivisionSize + HALF_LENGTH, MPI_FLOAT, &yHaloType);
-		int uprecv = (yBlockSize + HALF_LENGTH) * p.n3;
-		int upsend = yBlockSize * p.n3;
-		
-		int nowrecvup = 0;
-		int nowrecvdown = (blockSize + HALF_LENGTH) * p.n1 * p.n2;
-		int nowsend2up = HALF_LENGTH * p.n1 * p.n2;
-		int nowsend2down = blockSize * p.n1 * p.n2;
-		MPI_Sendrecv(&p.next[nowsend2up], HALF_LENGTH * p.n1 * p.n2, MPI_FLOAT, up, 1, &p.next[nowrecvdown], HALF_LENGTH * p.n1 * p.n2, MPI_FLOAT, down, 1, MPI_COMM_WORLD, &status);
+		int nowSend2Up = (HALF_LENGTH) * p.n3;
+		int nowRecvUp = 0;
+
+		int nowSend2Down = yDivisionSize  * p.n3;
+		int nowRecvDown = (HALF_LENGTH+yDivisionSize) * p.n3;
+
+		int nowRecvLeft = 0;
+		int nowSend2Left = HALF_LENGTH * p.n2 * p.n3 ;
+
+		int nowRecvRight = (HALF_LENGTH + xDivisionSize)*p.n2*p.n3;
+		int nowSend2Right = (xDivisionSize)*p.n2*p.n3;
+
+
+
+
+		MPI_Sendrecv(&p.next[nowSend2Up], HALF_LENGTH * p.n2 * p.n3, MPI_FLOAT, up, 1, &p.next[nowRecvDown], HALF_LENGTH * p.n2 * p.n3, MPI_FLOAT, down, 1, MPI_COMM_WORLD, &status);
 
 		//更新now进程的下halo区,更新next进程的上halo区
-		MPI_Sendrecv(&p.next[nowsend2down], HALF_LENGTH * p.n1 * p.n2, MPI_FLOAT, down, 1, &p.next[nowrecvup], HALF_LENGTH * p.n1 * p.n2, MPI_FLOAT, up, 1, MPI_COMM_WORLD, &status); //上halo区
+		MPI_Sendrecv(&p.next[nowSend2Down], HALF_LENGTH * p.n2 * p.n3, MPI_FLOAT, down, 1, &p.next[nowRecvUp], HALF_LENGTH * p.n2 * p.n3, MPI_FLOAT, up, 1, MPI_COMM_WORLD, &status); //上halo区
+
+		MPI_Sendrecv(&p.next[nowSend2Left],1,yHaloType,left,1,&p.next[nowRecvRight], 1,yHaloType,right,1,MPI_COMM_WORLD,&status);
+
+		MPI_Sendrecv(&p.next[nowSend2Right],1,yHaloType,right,1,&p.next[nowRecvLeft], 1,yHaloType,left,1,MPI_COMM_WORLD,&status);
+
 
 		float *temp;
 		temp = p.next;
