@@ -278,9 +278,9 @@ int main(int argc, char **argv)
 	down = rank - 3;
 	xDivisionSize=xBlockSize;
 	yDivisionSize=yBlockSize;
-	if (left % xProcessNum == 0)
+	if (rank) % xProcessNum == 0)
 		left = MPI_PROC_NULL;
-	if ((right + 1) % xProcessNum == 0)
+	if ((rank + 1) % xProcessNum == 0)
 	{
 		down = MPI_PROC_NULL;
 		xDivisionSize = (p.n1 - 2 * HALF_LENGTH) - (xProcessNum - 1) * xBlockSize;
