@@ -334,7 +334,7 @@ int main(int argc, char **argv)
 	MPI_Type_commit(&yHaloType);
 	for (int step = 0; step < /*p.nreps*/ 4; step++)
 	{
-		reference_implementation_mpi(p.next, p.prev, coeff, p.vel, p.n1, p.n2, p.n3, HALF_LENGTH, blockSize);
+		reference_implementation_mpi_x_y(p.next, p.prev, coeff, p.vel, xDivisionSize, yDivisionSize, p.n3, HALF_LENGTH, blockSize);
 	
 		int nowSend2Up = (HALF_LENGTH) * p.n3;
 		int nowRecvUp = 0;
