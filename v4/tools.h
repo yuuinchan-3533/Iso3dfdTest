@@ -105,6 +105,27 @@ void reference_implementation_mpi(float *next, float *prev, float *coeff,float *
     }   
 }
 
+void reference_implementation_mpi_x_y(float *next, float *prev, float *coeff,float *vel,const int n1, const int n2, const int n3, const int half_length, const int blockSize){
+    int n1n2 = n1*n2;
+  
+    for(int iz=0; iz<n3; iz++) {
+      for(int iy=HALF_LENGTH; iy<HALF_LENGTH+n2; iy++) {
+        for(int ix=HALF_LENGTH; ix<HALF_LENGTH+n1; ix++) {
+          if( iz>=half_length && iz<(n3-half_length)) {
+            float res = prev[iz*n1n2 + iy*n1 + ix]*coeff[0];
+            for(int ir=1; ir<=half_length; ir++) {
+              res += coeff[ir] * (prev[iz*n1n2 + iy*n1 + ix+ir] + prev[iz*n1n2 + iy*n1 + ix-ir]);       // horizontal
+              res += coeff[ir] * (prev[iz*n1n2 + iy*n1 + ix+ir*n1] + prev[iz*n1n2 + iy*n1 + ix-ir*n1]);   // vertical
+              res += coeff[ir] * (prev[iz*n1n2 + iy*n1 + ix+ir*n1*n2] + prev[iz*n1n2 + iy*n1 + ix-ir*n1*n2]); // in front / behind
+            }
+            next[iz*n1n2 + iy*n1 +ix] = 2.0f* prev[iz*n1n2 + iy*n1 +ix] - next[iz*n1n2 + iy*n1 +ix] + res * vel[iz*n1n2 + iy*n1 +ix];
+            //printf("(%d %d %d):prev:%.3f next:%.3f vel:%.3f\n",)
+          }
+        }
+      }
+    }   
+}
+
 bool within_epsilon(float* output, float *reference, const int dimx, const int dimy, const int dimz, const int radius, const int zadjust=0, const float delta=0.0001f )
 {
   bool retval = true;
