@@ -274,11 +274,11 @@ int main(int argc, char **argv)
 
 	left = rank - 1;
 	right = rank + 1;
-	up = rank + 3;
-	down = rank - 3;
+	up = rank + xProcessNum;
+	down = rank - xProcessNum;
 	xDivisionSize=xBlockSize;
 	yDivisionSize=yBlockSize;
-	if (rank) % xProcessNum == 0)
+	if (rank % xProcessNum == 0)
 		left = MPI_PROC_NULL;
 	if ((rank + 1) % xProcessNum == 0)
 	{
