@@ -226,6 +226,7 @@ int main(int argc, char **argv)
 	}
 
 	initiate_params(p.n1,p.n2);
+	printf("%d  %d\n",xProcessNum,yProcessNum);
 	// Make sure nreps is rouded up to next even number (to support swap)
 	p.nreps = ((p.nreps + 1) / 2) * 2;
 
@@ -275,6 +276,8 @@ int main(int argc, char **argv)
 	right = rank + 1;
 	up = rank + 3;
 	down = rank - 3;
+	xDivisionSize=xBlockSize;
+	yDivisionSize=yBlockSize;
 	if (left % xProcessNum == 0)
 		left = MPI_PROC_NULL;
 	if ((right + 1) % xProcessNum == 0)
@@ -292,10 +295,12 @@ int main(int argc, char **argv)
 		down = MPI_PROC_NULL;
 	}
 	// allocate dat memory
+	printf("rank:%d left:%d right:%d up:%d down:%d \n",rank,left,right,up,down);
 	size_t nsize = p.n1 * p.n2 * p.n3;
 	size_t nsize_mpi = (HALF_LENGTH + xDivisionSize + HALF_LENGTH) * (HALF_LENGTH + yDivisionSize + HALF_LENGTH) * p.n3;
-	size_t nbytes = nsize * sizeof(float);
+	size_t nbytes = nsize_mpi * sizeof(float);
 
+	printf("nsize_mpi:%d ,xDivisionSize:%d ,yDivisionSize:%d \n",nsize_mpi,xDivisionSize,yDivisionSize);
 	printf("allocating prev, next and vel: total %g Mbytes\n", (3.0 * (nbytes + 16)) / (1024 * 1024));
 	fflush(NULL);
 
