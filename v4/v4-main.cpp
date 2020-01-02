@@ -282,7 +282,7 @@ int main(int argc, char **argv)
 		left = MPI_PROC_NULL;
 	if ((rank + 1) % xProcessNum == 0)
 	{
-		down = MPI_PROC_NULL;
+		right = MPI_PROC_NULL;
 		xDivisionSize = (p.n1 - 2 * HALF_LENGTH) - (xProcessNum - 1) * xBlockSize;
 	}
 	if (up >= pSize) 
@@ -330,10 +330,12 @@ int main(int argc, char **argv)
 
 	initiate_mpi_x_y(p.prev, p.next, p.vel, &p, 2 * HALF_LENGTH + blockSize, blockSize, rank);
 	wstart = walltime();
+	MPI_Type_vector(HALF_LENGTH+yDivisionSize+HALF_LENGTH, HALF_LENGTH, HALF_LENGTH + xDivisionSize + HALF_LENGTH, MPI_FLOAT, &yHaloType);
+	MPI_Type_commit(&yHaloType);
 	for (int step = 0; step < /*p.nreps*/ 4; step++)
 	{
 		reference_implementation_mpi(p.next, p.prev, coeff, p.vel, p.n1, p.n2, p.n3, HALF_LENGTH, blockSize);
-		MPI_Type_vector(yDivisionSize, HALF_LENGTH, HALF_LENGTH + xDivisionSize + HALF_LENGTH, MPI_FLOAT, &yHaloType);
+	
 		int nowSend2Up = (HALF_LENGTH) * p.n3;
 		int nowRecvUp = 0;
 
