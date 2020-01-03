@@ -375,7 +375,7 @@ int main(int argc, char **argv)
 	for (int step = 0; step < /*p.nreps*/ 4; step++)
 	{
 		//reference_implementation_mpi_2D(float *next, float *prev, float *coeff, float *vel, float *preHalo,const int n3, const int half_length, const int xDivisionSize, const int yDivisionSize)
-		reference_implementation_mpi_2D(p.next, p.prev, coeff, p.vel, p.preHalo,p.n3, HALF_LENGTH,xDivisionSize, yDivisionSize);
+		reference_implementation_mpi_2D(p.next, p.prev, coeff, p.vel, p.prevHalo,p.n3, HALF_LENGTH,xDivisionSize, yDivisionSize);
 		//copy_next_to_send(float *next, float *send, const int half_length, const int xDivisionSize,const int yDivisionSize, const int n3)
 		copy_next_to_send(p.next,p.sendBlock,HALF_LENGTH,xDivisionSize,yDivisionSize,p.n3);
 		
@@ -397,7 +397,7 @@ int main(int argc, char **argv)
 		//更新now进程的下halo区,更新next进程的上halo区
 		MPI_Sendrecv(&p.next[nowSend2Down], HALF_LENGTH * p.n2 * p.n3, MPI_FLOAT, down, 1, &p.next[nowRecvUp], HALF_LENGTH * p.n2 * p.n3, MPI_FLOAT, up, 1, MPI_COMM_WORLD, &status); //上halo区
 
-		MPI_Sendrecv(&p.send[nowSend2Left],haloSendSize, MPI_FLOAT, left, 1, &p.nextHalo[nowRecvRight], haloSendSize, MPI_FLOAT, right, 1, MPI_COMM_WORLD, &status);
+		MPI_Sendrecv(&p.sendBlock[nowSend2Left],haloSendSize, MPI_FLOAT, left, 1, &p.nextHalo[nowRecvRight], haloSendSize, MPI_FLOAT, right, 1, MPI_COMM_WORLD, &status);
 
 		MPI_Sendrecv(&p.next[nowSend2Right], haloSendSize, MPI_FLOAT, right, 1, &p.nextHalo[nowRecvLeft], haloSendSize, MPI_FLOAT, left, 1, MPI_COMM_WORLD, &status);
 
