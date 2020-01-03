@@ -326,15 +326,15 @@ int main(int argc, char **argv)
 		down = MPI_PROC_NULL;
 	}
 	// allocate dat memory
-	printf("rank:%d left:%d right:%d up:%d down:%d \n", rank, left, right, up, down);
+	//printf("rank:%d left:%d right:%d up:%d down:%d \n", rank, left, right, up, down);
 	size_t nsize = p.n1 * p.n2 * p.n3;
 	size_t nsize_mpi = (2 * HALF_LENGTH + xDivisionSize) * (2 * HALF_LENGTH + yDivisionSize) * p.n3;
 	size_t nsize_halo = 2 * HALF_LENGTH * (HALF_LENGTH + yDivisionSize + HALF_LENGTH) * p.n3; //左右两个halo区并成一块
 	size_t nbytes = nsize_mpi * sizeof(float);
 	size_t nbytes_halo = nsize_halo * sizeof(float);
 
-	printf("nsize_mpi:%d ,xDivisionSize:%d ,yDivisionSize:%d \n", nsize_mpi, xDivisionSize, yDivisionSize);
-	printf("allocating prev, next and vel: total %g Mbytes\n", (3.0 * (nbytes + 16)) / (1024 * 1024));
+	//printf("nsize_mpi:%d ,xDivisionSize:%d ,yDivisionSize:%d \n", nsize_mpi, xDivisionSize, yDivisionSize);
+	//printf("allocating prev, next and vel: total %g Mbytes\n", (3.0 * (nbytes + 16)) / (1024 * 1024));
 	fflush(NULL);
 
 	float *prev_base = (float *)_mm_malloc((nsize_mpi + 16 + MASK_ALLOC_OFFSET(0)) * sizeof(float), CACHELINE_BYTES);
@@ -392,15 +392,16 @@ int main(int argc, char **argv)
 		int nowSend2Right = (HALF_LENGTH) * (2*HALF_LENGTH+yDivisionSize)*p.n3;
 		int haloSendSize=HALF_LENGTH * (HALF_LENGTH + yDivisionSize + HALF_LENGTH) * p.n3;
 
+		
 		MPI_Sendrecv(&p.next[nowSend2Up], HALF_LENGTH * p.n2 * p.n3, MPI_FLOAT, up, 1, &p.next[nowRecvDown], HALF_LENGTH * p.n2 * p.n3, MPI_FLOAT, down, 1, MPI_COMM_WORLD, &status);
-
+		printf("send up success");
 		//更新now进程的下halo区,更新next进程的上halo区
 		MPI_Sendrecv(&p.next[nowSend2Down], HALF_LENGTH * p.n2 * p.n3, MPI_FLOAT, down, 1, &p.next[nowRecvUp], HALF_LENGTH * p.n2 * p.n3, MPI_FLOAT, up, 1, MPI_COMM_WORLD, &status); //上halo区
-
+		printf("send down success");
 		MPI_Sendrecv(&p.sendBlock[nowSend2Left],haloSendSize, MPI_FLOAT, left, 1, &p.nextHalo[nowRecvRight], haloSendSize, MPI_FLOAT, right, 1, MPI_COMM_WORLD, &status);
-
+		printf("send left success");
 		MPI_Sendrecv(&p.next[nowSend2Right], haloSendSize, MPI_FLOAT, right, 1, &p.nextHalo[nowRecvLeft], haloSendSize, MPI_FLOAT, left, 1, MPI_COMM_WORLD, &status);
-
+		printf("send right success");
 		float *temp;
 		temp = p.next;
 		p.next = p.prev;
