@@ -52,6 +52,9 @@ typedef struct
 	float *prev;
 	float *next;
 	float *vel;
+	float *prevHalo; //prev的halo区，prevHalo[0~HALF_LENGTH][y][z]为左halo区，prevHalo[HALF_LENGTH~2*HALF_LENGTH][y][z]为右halo区
+	float *nextHalo;
+	float *sendBlock; //需要被发送的数据区域，send[0~HALF_LENGTH][y][z]为向left传递的数据区，send[HALF_LENGTH~2*HALF_LENGTH][y][z]为向right传递的数据区
 } Parameters;
 
 //Function used for initialization
@@ -80,39 +83,48 @@ void output(Parameters *p, int blockSize, int rank)
 		}
 	}
 }
-void initialize(float* ptr_prev, float* ptr_next, float* ptr_vel, Parameters* p, size_t nbytes){
-        memset(ptr_prev, 0.0f, nbytes);
-        memset(ptr_next, 0.0f, nbytes);
-        memset(ptr_vel, 1500.0f, nbytes);
-        for(int i=0; i<p->n3; i++){
-                for(int j=0; j<p->n2; j++){
-                        for(int k=0; k<p->n1; k++){
-                                ptr_prev[i*p->n2*p->n1 + j*p->n1 + k] = 0.0f;
-                                ptr_next[i*p->n2*p->n1 + j*p->n1 + k] = 0.0f;
-                                ptr_vel[i*p->n2*p->n1 + j*p->n1 + k] = 2250000.0f*DT*DT;//Integration of the v² and dt² here
-                        }
-                }
-        }
+void initialize(float *ptr_prev, float *ptr_next, float *ptr_vel, Parameters *p, size_t nbytes)
+{
+	memset(ptr_prev, 0.0f, nbytes);
+	memset(ptr_next, 0.0f, nbytes);
+	memset(ptr_vel, 1500.0f, nbytes);
+	for (int i = 0; i < p->n3; i++)
+	{
+		for (int j = 0; j < p->n2; j++)
+		{
+			for (int k = 0; k < p->n1; k++)
+			{
+				ptr_prev[i * p->n2 * p->n1 + j * p->n1 + k] = 0.0f;
+				ptr_next[i * p->n2 * p->n1 + j * p->n1 + k] = 0.0f;
+				ptr_vel[i * p->n2 * p->n1 + j * p->n1 + k] = 2250000.0f * DT * DT; //Integration of the v² and dt² here
+			}
+		}
+	}
 	//Then we add a source
-        float val = 1.f;
-        for(int s=5; s>=0; s--){
-                for(int i=p->n3/2-s; i<p->n3/2+s;i++){
-                        for(int j=p->n2/4-s; j<p->n2/4+s;j++){
-                                for(int k=p->n1/4-s; k<p->n1/4+s;k++){
-                                        ptr_prev[i*p->n1*p->n2 + j*p->n1 + k] = val;
-                                }
-                        }
-                }
-                val *= 10;
-       }
+	float val = 1.f;
+	for (int s = 5; s >= 0; s--)
+	{
+		for (int i = p->n3 / 2 - s; i < p->n3 / 2 + s; i++)
+		{
+			for (int j = p->n2 / 4 - s; j < p->n2 / 4 + s; j++)
+			{
+				for (int k = p->n1 / 4 - s; k < p->n1 / 4 + s; k++)
+				{
+					ptr_prev[i * p->n1 * p->n2 + j * p->n1 + k] = val;
+				}
+			}
+		}
+		val *= 10;
+	}
 }
-void initiate_mpi_x_y(float *ptr_prev, float *ptr_next, float *ptr_vel, Parameters *p, int processXBlockSize, int processYBlockSize, int rank)
+void initiate_mpi_x_y(float *ptr_prev, float *ptr_next, float *ptr_vel, Parameters *p, int xDivisionSize, int yDivisionSize, int rank)
 {
 	int xOffSet = (rank % xProcessNum) * xBlockSize;
 	int yOffSet = (rank / xProcessNum) * yBlockSize;
-	for (int x = 0; x < HALF_LENGTH + processXBlockSize + HALF_LENGTH; x++)
+	int haloKey = -1;
+	for (int x = 0; x < HALF_LENGTH + xDivisionSize + HALF_LENGTH; x++)
 	{
-		for (int y = 0; y < HALF_LENGTH + processYBlockSize + HALF_LENGTH; y++)
+		for (int y = 0; y < HALF_LENGTH + yDivisionSize + HALF_LENGTH; y++)
 		{
 			for (int z = 0; z < p->n3; z++)
 			{
@@ -121,28 +133,49 @@ void initiate_mpi_x_y(float *ptr_prev, float *ptr_next, float *ptr_vel, Paramete
 				ptr_prev[key] = sin((x + xOffSet) * 100 + (y + yOffSet) * 10 + z);
 				ptr_next[key] = cos((x + xOffSet) * 100 + (y + yOffSet) * 10 + z);
 				ptr_vel[key] = 2250000.0f * DT * DT;
+				if (x < HALF_LENGTH)
+				{
+					haloKey = x * p->n2 * p->n3 + y * p->n3 + z;
+				}
+				else if (x >= HALF_LENGTH + xBlockSize)
+				{
+					haloKey = (x - xBlockSize) * p->n2 * p->n3 + y * p->n3 + z;
+				}
+				else
+				{
+					haloKey = -1;
+				}
+				if (haloKey != -1)
+				{
+					p->prevHalo[haloKey] = sin((x + xOffSet) * 100 + (y + yOffSet) * 10 + z);
+					p->nextHalo[haloKey] = cos((x + xOffSet) * 100 + (y + yOffSet) * 10 + z);
+				}
 			}
 		}
 	}
 }
-void initiate_params(int n1,int n2){
-	int x,y;
-	float diff=n1>n2?(n1+0.0)/(n2+0.0):(n2+0.0)/(n1+0.0);
-	float minn=100000.0;
-	float tempdiff=0;
-	x=floor(sqrt(pSize));
-	for(int i=x;i>0;i--){
-		if(pSize%x==0){
-			tempdiff=(pSize/x)/(x+0.0);
-			if(abs(tempdiff-diff)<minn){
-				minn=abs(tempdiff-diff);
-				xProcessNum=x;
-				yProcessNum=pSize/x;
-			}			
+void initiate_params(int n1, int n2)
+{
+	int x, y;
+	float diff = n1 > n2 ? (n1 + 0.0) / (n2 + 0.0) : (n2 + 0.0) / (n1 + 0.0);
+	float minn = 100000.0;
+	float tempdiff = 0;
+	x = floor(sqrt(pSize));
+	for (int i = x; i > 0; i--)
+	{
+		if (pSize % x == 0)
+		{
+			tempdiff = (pSize / x) / (x + 0.0);
+			if (abs(tempdiff - diff) < minn)
+			{
+				minn = abs(tempdiff - diff);
+				xProcessNum = x;
+				yProcessNum = pSize / x;
+			}
 		}
 	}
-	xBlockSize=ceil((n1- 2 * HALF_LENGTH)/(xProcessNum+0.0));
-	yBlockSize=ceil((n2- 2 * HALF_LENGTH)/(yProcessNum+0.0));
+	xBlockSize = ceil((n1 - 2 * HALF_LENGTH) / (xProcessNum + 0.0));
+	yBlockSize = ceil((n2 - 2 * HALF_LENGTH) / (yProcessNum + 0.0));
 	return;
 }
 
@@ -225,15 +258,13 @@ int main(int argc, char **argv)
 		exit(1);
 	}
 
-	initiate_params(p.n1,p.n2);
-	printf("%d  %d\n",xProcessNum,yProcessNum);
+	initiate_params(p.n1, p.n2);
+	printf("%d  %d\n", xProcessNum, yProcessNum);
 	// Make sure nreps is rouded up to next even number (to support swap)
 	p.nreps = ((p.nreps + 1) / 2) * 2;
 
-	printf("n1=%d n2=%d n3=%d nreps=%d num_threads=%d HALF_LENGTH=%d\n", p.n1, p.n2, p.n3, p.nreps, p.num_threads, HALF_LENGTH);
-	printf("n1_thrd_block=%d n2_thrd_block=%d n3_thrd_block=%d\n", p.n1_Tblock, p.n2_Tblock, p.n3_Tblock);
-
-	blockSize = ceil((p.n3 - 2 * HALF_LENGTH) / (pSize + 0.0));
+	//printf("n1=%d n2=%d n3=%d nreps=%d num_threads=%d HALF_LENGTH=%d\n", p.n1, p.n2, p.n3, p.nreps, p.num_threads, HALF_LENGTH);
+	//printf("n1_thrd_block=%d n2_thrd_block=%d n3_thrd_block=%d\n", p.n1_Tblock, p.n2_Tblock, p.n3_Tblock);
 
 #if (HALF_LENGTH == 4)
 	float coeff[HALF_LENGTH + 1] = {
@@ -271,13 +302,13 @@ int main(int argc, char **argv)
 	double wstart, wstop;
 	float elapsed_time = 0.0f, throughput_mpoints = 0.0f, mflops = 0.0f;
 
-
 	left = rank - 1;
 	right = rank + 1;
 	up = rank + xProcessNum;
 	down = rank - xProcessNum;
-	xDivisionSize=xBlockSize;
-	yDivisionSize=yBlockSize;
+	xDivisionSize = xBlockSize;
+	yDivisionSize = yBlockSize;
+	
 	if (rank % xProcessNum == 0)
 		left = MPI_PROC_NULL;
 	if ((rank + 1) % xProcessNum == 0)
@@ -285,7 +316,7 @@ int main(int argc, char **argv)
 		right = MPI_PROC_NULL;
 		xDivisionSize = (p.n1 - 2 * HALF_LENGTH) - (xProcessNum - 1) * xBlockSize;
 	}
-	if (up >= pSize) 
+	if (up >= pSize)
 	{
 		up = MPI_PROC_NULL;
 		yDivisionSize = (p.n2 - 2 * HALF_LENGTH) - (yProcessNum - 1) * yBlockSize;
@@ -295,18 +326,24 @@ int main(int argc, char **argv)
 		down = MPI_PROC_NULL;
 	}
 	// allocate dat memory
-	printf("rank:%d left:%d right:%d up:%d down:%d \n",rank,left,right,up,down);
+	printf("rank:%d left:%d right:%d up:%d down:%d \n", rank, left, right, up, down);
 	size_t nsize = p.n1 * p.n2 * p.n3;
-	size_t nsize_mpi = (HALF_LENGTH + xDivisionSize + HALF_LENGTH) * (HALF_LENGTH + yDivisionSize + HALF_LENGTH) * p.n3;
+	size_t nsize_mpi = (2 * HALF_LENGTH + xDivisionSize) * (2 * HALF_LENGTH + yDivisionSize) * p.n3;
+	size_t nsize_halo = 2 * HALF_LENGTH * (HALF_LENGTH + yDivisionSize + HALF_LENGTH) * p.n3; //左右两个halo区并成一块
 	size_t nbytes = nsize_mpi * sizeof(float);
+	size_t nbytes_halo = nsize_halo * sizeof(float);
 
-	printf("nsize_mpi:%d ,xDivisionSize:%d ,yDivisionSize:%d \n",nsize_mpi,xDivisionSize,yDivisionSize);
+	printf("nsize_mpi:%d ,xDivisionSize:%d ,yDivisionSize:%d \n", nsize_mpi, xDivisionSize, yDivisionSize);
 	printf("allocating prev, next and vel: total %g Mbytes\n", (3.0 * (nbytes + 16)) / (1024 * 1024));
 	fflush(NULL);
 
 	float *prev_base = (float *)_mm_malloc((nsize_mpi + 16 + MASK_ALLOC_OFFSET(0)) * sizeof(float), CACHELINE_BYTES);
 	float *next_base = (float *)_mm_malloc((nsize_mpi + 16 + MASK_ALLOC_OFFSET(16)) * sizeof(float), CACHELINE_BYTES);
 	float *vel_base = (float *)_mm_malloc((nsize_mpi + 16 + MASK_ALLOC_OFFSET(32)) * sizeof(float), CACHELINE_BYTES);
+
+	float *prev_halo = (float *)_mm_malloc((nbytes_halo + 16 + MASK_ALLOC_OFFSET(0)) * sizeof(float), CACHELINE_BYTES);
+	float *next_halo = (float *)_mm_malloc((nbytes_halo + 16 + MASK_ALLOC_OFFSET(16)) * sizeof(float), CACHELINE_BYTES);
+	float *send_block = (float *)_mm_malloc((nbytes_halo + 16 + MASK_ALLOC_OFFSET(32)) * sizeof(float), CACHELINE_BYTES);
 
 	if (prev_base == NULL || next_base == NULL || vel_base == NULL)
 	{
@@ -321,45 +358,48 @@ int main(int argc, char **argv)
 	p.next = &next_base[16 + ALIGN_HALO_FACTOR + MASK_ALLOC_OFFSET(16)];
 	p.vel = &vel_base[16 + ALIGN_HALO_FACTOR + MASK_ALLOC_OFFSET(32)];
 
+	p.prevHalo = &prev_halo[16 + ALIGN_HALO_FACTOR + MASK_ALLOC_OFFSET(0)];
+	p.nextHalo = &next_halo[16 + ALIGN_HALO_FACTOR + MASK_ALLOC_OFFSET(16)];
+	p.sendBlock = &send_block[16 + ALIGN_HALO_FACTOR + MASK_ALLOC_OFFSET(32)];
+
 	//initialize(p.prev, p.next, p.vel, &p, nbytes);
 	// A couple of run to start threading library
 	//int tmp_nreps = 2;
 
 	//iso_3dfd(p.next, p.prev, p.vel, coeff, p.n1, p.n2, p.n3, p.num_threads, tmp_nreps, p.n1_Tblock, p.n2_Tblock, p.n3_Tblock);
 
-
 	initiate_mpi_x_y(p.prev, p.next, p.vel, &p, 2 * HALF_LENGTH + blockSize, blockSize, rank);
 	wstart = walltime();
-	MPI_Type_vector(HALF_LENGTH+yDivisionSize+HALF_LENGTH, HALF_LENGTH, HALF_LENGTH + xDivisionSize + HALF_LENGTH, MPI_FLOAT, &yHaloType);
-	MPI_Type_commit(&yHaloType);
+	//MPI_Type_vector(HALF_LENGTH+yDivisionSize+HALF_LENGTH, HALF_LENGTH, HALF_LENGTH + xDivisionSize + HALF_LENGTH, MPI_FLOAT, &yHaloType);
+	//MPI_Type_commit(&yHaloType);
 	for (int step = 0; step < /*p.nreps*/ 4; step++)
 	{
-		reference_implementation_mpi_x_y(p.next, p.prev, coeff, p.vel, xDivisionSize, yDivisionSize, p.n3, HALF_LENGTH, blockSize);
-	
-		int nowSend2Up = (HALF_LENGTH) * p.n3;
+		//reference_implementation_mpi_2D(float *next, float *prev, float *coeff, float *vel, float *preHalo,const int n3, const int half_length, const int xDivisionSize, const int yDivisionSize)
+		reference_implementation_mpi_2D(p.next, p.prev, coeff, p.vel, p.preHalo,p.n3, HALF_LENGTH,xDivisionSize, yDivisionSize);
+		//copy_next_to_send(float *next, float *send, const int half_length, const int xDivisionSize,const int yDivisionSize, const int n3)
+		copy_next_to_send(p.next,p.sendBlock,HALF_LENGTH,xDivisionSize,yDivisionSize,p.n3);
+		
+		int nowSend2Up = (HALF_LENGTH)*p.n3;
 		int nowRecvUp = 0;
 
-		int nowSend2Down = yDivisionSize  * p.n3;
-		int nowRecvDown = (HALF_LENGTH+yDivisionSize) * p.n3;
+		int nowSend2Down = yDivisionSize * p.n3;
+		int nowRecvDown = (HALF_LENGTH + yDivisionSize) * p.n3;
 
 		int nowRecvLeft = 0;
-		int nowSend2Left = HALF_LENGTH * p.n2 * p.n3 ;
+		int nowSend2Left = 0;
 
-		int nowRecvRight = (HALF_LENGTH + xDivisionSize)*p.n2*p.n3;
-		int nowSend2Right = (xDivisionSize)*p.n2*p.n3;
-
-
-
+		int nowRecvRight = (HALF_LENGTH) * (2*HALF_LENGTH+yDivisionSize)*p.n3;
+		int nowSend2Right = (HALF_LENGTH) * (2*HALF_LENGTH+yDivisionSize)*p.n3;
+		int haloSendSize=HALF_LENGTH * (HALF_LENGTH + yDivisionSize + HALF_LENGTH) * p.n3;
 
 		MPI_Sendrecv(&p.next[nowSend2Up], HALF_LENGTH * p.n2 * p.n3, MPI_FLOAT, up, 1, &p.next[nowRecvDown], HALF_LENGTH * p.n2 * p.n3, MPI_FLOAT, down, 1, MPI_COMM_WORLD, &status);
 
 		//更新now进程的下halo区,更新next进程的上halo区
 		MPI_Sendrecv(&p.next[nowSend2Down], HALF_LENGTH * p.n2 * p.n3, MPI_FLOAT, down, 1, &p.next[nowRecvUp], HALF_LENGTH * p.n2 * p.n3, MPI_FLOAT, up, 1, MPI_COMM_WORLD, &status); //上halo区
 
-		MPI_Sendrecv(&p.next[nowSend2Left],1,yHaloType,left,1,&p.next[nowRecvRight], 1,yHaloType,right,1,MPI_COMM_WORLD,&status);
+		MPI_Sendrecv(&p.send[nowSend2Left],haloSendSize, MPI_FLOAT, left, 1, &p.nextHalo[nowRecvRight], haloSendSize, MPI_FLOAT, right, 1, MPI_COMM_WORLD, &status);
 
-		MPI_Sendrecv(&p.next[nowSend2Right],1,yHaloType,right,1,&p.next[nowRecvLeft], 1,yHaloType,left,1,MPI_COMM_WORLD,&status);
-
+		MPI_Sendrecv(&p.next[nowSend2Right], haloSendSize, MPI_FLOAT, right, 1, &p.nextHalo[nowRecvLeft], haloSendSize, MPI_FLOAT, left, 1, MPI_COMM_WORLD, &status);
 
 		float *temp;
 		temp = p.next;
