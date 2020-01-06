@@ -83,7 +83,7 @@ void output(Parameters *p, int blockSize, int rank)
 		}
 	}
 }
-void output_halo(const int n3,const int yDivisonSize,Parameters *p){
+void output_halo(const int n3,const int yDivisionSize,Parameters *p){
 	int n2n3=(2*HALF_LENGTH+yDivisionSize)*n3;
 	for(int ix=0;ix<2*HALF_LENGTH;ix++){
 		for(int iy=0;iy<2*HALF_LENGTH+yDivisionSize;iy++){
@@ -405,7 +405,7 @@ int main(int argc, char **argv)
 		//更新now进程的下halo区,更新next进程的上halo区
 		MPI_Sendrecv(&p.next[nowSend2Down], HALF_LENGTH * p.n2 * p.n3, MPI_FLOAT, down, 1, &p.next[nowRecvUp], HALF_LENGTH * p.n2 * p.n3, MPI_FLOAT, up, 1, MPI_COMM_WORLD, &status); //上halo区
 		printf("send down success");
-		output_halo(p.n3,yDivisionSize,p);
+		output_halo(p.n3,yDivisionSize,&p);
 		//MPI_Sendrecv(&p.sendBlock[nowSend2Left], haloSendSize, MPI_FLOAT, left, 1, &p.nextHalo[nowRecvRight], haloSendSize, MPI_FLOAT, right, 1, MPI_COMM_WORLD, &status);
 		//printf("send left success");
 		//MPI_Sendrecv(&p.sendBlock[nowSend2Right], haloSendSize, MPI_FLOAT, right, 1, &p.nextHalo[nowRecvLeft], haloSendSize, MPI_FLOAT, left, 1, MPI_COMM_WORLD, &status);
