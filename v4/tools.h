@@ -185,18 +185,23 @@ void copy_next_to_send(float *next, float *send, const int half_length, const in
 
   int n2n3 = (2 * half_length + yDivisionSize) * n3;
 
+  int key=-1;
+  int ix;
   for (int iy = half_length; iy < half_length + yDivisionSize; iy++)
   {
     for (int iz = 0; iz < n3; iz++)
     {
-      for (int ix = half_length; ix < 2 * half_length; ix++)
+      for (ix = half_length; ix < 2 * half_length; ix++)
       {
+	key=(ix - half_length) * n2n3 + iy * n3 + iz;
         send[(ix - half_length) * n2n3 + iy * n3 + iz] = next[ix * n2n3 + iy * n3 + iz];
       }
-
-      for (int ix = xDivisionSize;ix<xDivisionSize+half_length;ix++){
+	printf("(%d,%d,%d):%.3f\n",ix,iy,iz,send[key]);
+      for (ix = xDivisionSize;ix<xDivisionSize+half_length;ix++){
+	key=(ix - xDivisionSize + half_length) * n2n3 + iy * n3 + iz;
         send[(ix - xDivisionSize + half_length) * n2n3 + iy * n3 + iz] = next[ix * n2n3 + iy * n3 + iz];
       }
+	printf("(%d,%d,%d):%.3f\n",ix,iy,iz,send[key]);
     }
   }
 }
