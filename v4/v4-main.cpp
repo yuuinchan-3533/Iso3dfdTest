@@ -429,11 +429,13 @@ int main(int argc, char **argv)
 	//MPI_Type_vector(HALF_LENGTH+yDivisionSize+HALF_LENGTH, HALF_LENGTH, HALF_LENGTH + xDivisionSize + HALF_LENGTH, MPI_FLOAT, &yHaloType);
 	//MPI_Type_commit(&yHaloType);
 	//printf("initiate success\n");
+	int xOffSet = (rank % xProcessNum) * xBlockSize;
+	int yOffSet = (rank / xProcessNum) * yBlockSize;
 	
-	for (int step = 0; step < /*p.nreps*/ 4; step++)
+	for (int step = 0; step < /*p.nreps*/ 2; step++)
 	{
 		//reference_implementation_mpi_2D(float *next, float *prev, float *coeff, float *vel, float *preHalo,const int n3, const int half_length, const int xDivisionSize, const int yDivisionSize)
-		reference_implementation_mpi_2D(p.next, p.prev, coeff, p.vel, p.prevHalo, p.n3, HALF_LENGTH, xDivisionSize, yDivisionSize);
+		reference_implementation_mpi_2D(p.next, p.prev, coeff, p.vel, p.prevHalo, p.n3, HALF_LENGTH, xDivisionSize, yDivisionSize,rank,xOffSet,yOffSet);
 	
 		//copy_next_to_senfloat *next, float *send, const int half_length, const int xDivisionSize,const int yDivisionSize, const int n3)
 		copy_next_to_send(p.next, p.sendBlock, HALF_LENGTH, xDivisionSize, yDivisionSize, p.n3);

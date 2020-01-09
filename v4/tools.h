@@ -81,8 +81,8 @@ void reference_implementation(float *next, float *prev, float *coeff,
             res += coeff[ir] * (prev[iz * n1n2 + iy * n1 + ix + ir * n1 * n2] + prev[iz * n1n2 + iy * n1 + ix - ir * n1 * n2]); // in front / behind
           }
           next[iz * n1n2 + iy * n1 + ix] = 2.0f * prev[iz * n1n2 + iy * n1 + ix] - next[iz * n1n2 + iy * n1 + ix] + res * vel[iz * n1n2 + iy * n1 + ix];
-          //
-          //printf("(%d %d %d):prev:%.3f next:%.3f vel:%.3f\n",)
+          printf("rank:%d(%d %d %d):prev:%.3f next:%.3f vel:%.3f\n",0,ix,iy,iz,prev[iz * n1n2 + iy * n1 + ix],next[iz * n1n2 + iy * n1 + ix],vel[iz * n1n2 + iy * n1 + ix]);
+
         }
       }
     }
@@ -143,7 +143,7 @@ void reference_implementation_mpi_x_y(float *next, float *prev, float *coeff, fl
   }
 }
 
-void reference_implementation_mpi_2D(float *next, float *prev, float *coeff, float *vel, float *preHalo,const int n3, const int half_length, const int xDivisionSize, const int yDivisionSize)
+void reference_implementation_mpi_2D(float *next, float *prev, float *coeff, float *vel, float *preHalo,const int n3, const int half_length, const int xDivisionSize, const int yDivisionSize,const int xOffSet,const int yOffSet,const int rank)
 {
   int n2n3 = (2*half_length+yDivisionSize) * n3;
 
@@ -173,7 +173,7 @@ void reference_implementation_mpi_2D(float *next, float *prev, float *coeff, flo
             res += coeff[ir] * (prevLeft + prevRight); // in front / behind
           }
           next[ix * n2n3 + iy * n3 + iz] = 2.0f * prev[ix * n2n3 + iy * n3 + iz] - next[ix * n2n3 + iy * n3 + iz] + res * vel[ix * n2n3 + iy * n3 + iz];
-          //printf("(%d %d %d):prev:%.3f next:%.3f vel:%.3f\n",ix,iy,iz,prev[ix*n2n3+iy*n3+iz],next[ix*n2n3+iy*n3+iz],vel[ix*n2n3+iy*n3+iz]);
+          printf("rank:%d(%d %d %d):prev:%.3f next:%.3f vel:%.3f\n",rank,ix+xOffSet,iy+yOffSet,iz,prev[ix*n2n3+iy*n3+iz],next[ix*n2n3+iy*n3+iz],vel[ix*n2n3+iy*n3+iz]);
         }
       }
     }
