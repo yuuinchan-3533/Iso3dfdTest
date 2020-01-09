@@ -435,7 +435,7 @@ int main(int argc, char **argv)
 	for (int step = 0; step < /*p.nreps*/ 2; step++)
 	{
 		//reference_implementation_mpi_2D(float *next, float *prev, float *coeff, float *vel, float *preHalo,const int n3, const int half_length, const int xDivisionSize, const int yDivisionSize)
-		reference_implementation_mpi_2D(p.next, p.prev, coeff, p.vel, p.prevHalo, p.n3, HALF_LENGTH, xDivisionSize, yDivisionSize,rank,xOffSet,yOffSet);
+		reference_implementation_mpi_2D(p.next, p.prev, coeff, p.vel, p.prevHalo, p.n3, HALF_LENGTH, xDivisionSize, yDivisionSize,xOffSet,yOffSet,rank);
 	
 		//copy_next_to_senfloat *next, float *send, const int half_length, const int xDivisionSize,const int yDivisionSize, const int n3)
 		copy_next_to_send(p.next, p.sendBlock, HALF_LENGTH, xDivisionSize, yDivisionSize, p.n3);
@@ -506,7 +506,6 @@ int main(int argc, char **argv)
 	}
 
 	initialize(p.prev, p_ref, p.vel, &p, nbytes);
-
 	reference_implementation(p_ref, p.prev, coeff, p.vel, p.n1, p.n2, p.n3, HALF_LENGTH);
 	if (within_epsilon(p.next, p_ref, p.n1, p.n2, p.n3, HALF_LENGTH, 0, 0.0001f))
 	{
