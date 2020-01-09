@@ -60,7 +60,7 @@ void initialize(float* ptr_prev, float* ptr_next, float* ptr_vel, Parameters* p,
 				ptr_prev[i*p->n2*p->n1 + j*p->n1 + k] = sin(i*100+j*10+k);
 				ptr_next[i*p->n2*p->n1 + j*p->n1 + k] = cos(i*100+j*10+k);
 				ptr_vel[i*p->n2*p->n1 + j*p->n1 + k] = 2250000.0f*DT*DT;//Integration of the v² and dt² here
-				printf("(%d %d %d):%.3f %.3f\n",k,j,i,ptr_prev[i*p->n2*p->n1 + j*p->n1 + k],ptr_next[i*p->n2*p->n1 + j*p->n1 + k]);
+//				printf("(%d %d %d):%.3f %.3f\n",k,j,i,ptr_prev[i*p->n2*p->n1 + j*p->n1 + k],ptr_next[i*p->n2*p->n1 + j*p->n1 + k]);
 			}
 		}
 	}
@@ -83,8 +83,8 @@ void output(Parameters* p){
 	//                for(int j=0; j<p->n2; j++){
 	//                        for(int k=0; k<p->n1; k++){
 	for(int i=HALF_LENGTH; i<p->n3-HALF_LENGTH; i++){
-		for(int j=0; j<p->n2; j++){
-			for(int k=0; k<p->n1; k++){
+		for(int j=HALF_LENGTH; j<p->n2-HALF_LENGTH; j++){
+			for(int k=HALF_LENGTH; k<p->n1-HALF_LENGTH; k++){
 				//printf("rank:%d(%d %d %d):%f\n",0,k,j,i,p->prev[i*p->n1*p->n2 + j*p->n1 + k]);
 				printf("(%d %d %d):%.3f\n",k,j,i,p->prev[i*p->n1*p->n2 + j*p->n1 + k]);
 			}

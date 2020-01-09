@@ -93,14 +93,16 @@ void output_2D(Parameters *p,int rank,int xDivisionSize,int yDivisionSize){
                  MPI_Barrier(MPI_COMM_WORLD);
                  if (rk == rank)
                  {
-                         for (int x = HALF_LENGTH; x < HALF_LENGTH + xBlockSize; x++)
-                         {
+                                 
+                 	for (int z = HALF_LENGTH; z < p->n3-HALF_LENGTH; z++)
+                        {
                                  for (int y = HALF_LENGTH; y < HALF_LENGTH + yBlockSize ; y++)
                                  {
-                                         for (int z = 0; z < p->n3; z++)
-                                         {
+                        		 for (int x = HALF_LENGTH; x < HALF_LENGTH + xBlockSize; x++)
+                         		 {
+                                         
                                                  int key = x * n2n3 + y * p->n3 + z;
-                                                 printf("rank:%d(%d %d %d):%f\n",rank,x+xOffSet,y+yOffSet,z,p->prev[key]);
+                                                 printf("(%d %d %d):%.3f\n",x+xOffSet,y+yOffSet,z,p->prev[key]);
                                                  //printf("(%d %d %d):%.3f\n", x, y, z + offset, p->prev[key]);
                                          }
                                  }
@@ -255,7 +257,6 @@ int main(int argc, char **argv)
 	int xDivisionSize, yDivisionSize; //该进程在x轴上计算的空间大小、该进程在y轴上计算的空间大小
 	MPI_Datatype yHaloType;			  //纵列
 
-	printf("%s %d\n",__FILE__,__LINE__);
 //	initiate_params(p.n1, p.n2);
 	if ((argc > 1) && (argc < 4))
 	{
@@ -313,7 +314,6 @@ int main(int argc, char **argv)
 		exit(1);
 	}
 
-	printf("%s %d\n",__FILE__,__LINE__);
 	
 	initiate_params(p.n1, p.n2);
 	//printf("%d  %d\n", xProcessNum, yProcessNum);
@@ -353,7 +353,6 @@ int main(int argc, char **argv)
 	}
 
 
-	printf("%s %d\n",__FILE__,__LINE__);
 	// Data Arrays
 	p.prev = NULL, p.next = NULL, p.vel = NULL;
 
@@ -368,9 +367,7 @@ int main(int argc, char **argv)
 	xDivisionSize = xBlockSize;
 	yDivisionSize = yBlockSize;
 	
-	printf("xblocksize:%d yblocksize:%d\n",xBlockSize,yBlockSize);
 
-	printf("%s %d\n",__FILE__,__LINE__);
 	
 	if (rank % xProcessNum == 0)
 		left = MPI_PROC_NULL;
