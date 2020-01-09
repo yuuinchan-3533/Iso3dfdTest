@@ -39,6 +39,8 @@ int rank, pSize;			  //rank：当前进程ID，pSize：总的进程数
 int xProcessNum, yProcessNum; //x轴上划分的进程数、y轴上划分的进程数
 int xBlockSize, yBlockSize;   //x轴每个进程算的格点数,y轴每个进程算得格点数
 
+float res[50][50][50];
+
 typedef struct
 {
 	size_t n1; // First dimension
@@ -102,16 +104,27 @@ void output_2D(Parameters *p,int rank,int xDivisionSize,int yDivisionSize){
                          		 {
                                          
                                                  int key = x * n2n3 + y * p->n3 + z;
-                                                 printf("(%d %d %d):%.3f\n",x+xOffSet,y+yOffSet,z,p->prev[key]);
+                                                 res[x+xOffSet][y+yOffSet][z]=p->prev[key];
+												 //printf("(%d %d %d):%.3f\n",x+xOffSet,y+yOffSet,z,p->prev[key]);
                                                  //printf("(%d %d %d):%.3f\n", x, y, z + offset, p->prev[key]);
                                          }
                                  }
                          }
                  }
          }
-
-
 }
+
+void output_res(Parameters *p){
+	for(int i=HALF_LENGTH; i<p->n3-HALF_LENGTH; i++){
+		for(int j=HALF_LENGTH; j<p->n2-HALF_LENGTH; j++){
+			for(int k=HALF_LENGTH; k<p->n1-HALF_LENGTH; k++){
+				//printf("rank:%d(%d %d %d):%f\n",0,k,j,i,p->prev[i*p->n1*p->n2 + j*p->n1 + k]);
+				printf("(%d %d %d):%.3f\n",k,j,i,res[k][j][i]);
+			}
+		}
+	}
+}
+
 void output_halo(const int n3,const int yDivisionSize,Parameters *p){
 	printf("output_halo\n");
 	int n2n3=(2*HALF_LENGTH+yDivisionSize)*n3;
@@ -481,6 +494,7 @@ int main(int argc, char **argv)
 		p.prev = temp;
 	}
 	output_2D(&p, rank,xDivisionSize,yDivisionSize);
+	output_res(&p);
 	MPI_Finalize();
 	wstop = walltime();
 
