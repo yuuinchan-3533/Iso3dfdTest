@@ -105,7 +105,7 @@ void output_2D(Parameters *p,int rank,int xDivisionSize,int yDivisionSize){
                                          
                                                  int key = x * n2n3 + y * p->n3 + z;
                                                  res[x+xOffSet][y+yOffSet][z]=p->prev[key];
-												 //printf("(%d %d %d):%.3f\n",x+xOffSet,y+yOffSet,z,p->prev[key]);
+						 printf("(%d %d %d):%.3f\n",x+xOffSet,y+yOffSet,z,p->prev[key]);
                                                  //printf("(%d %d %d):%.3f\n", x, y, z + offset, p->prev[key]);
                                          }
                                  }
@@ -119,7 +119,7 @@ void output_res(Parameters *p){
 		for(int j=HALF_LENGTH; j<p->n2-HALF_LENGTH; j++){
 			for(int k=HALF_LENGTH; k<p->n1-HALF_LENGTH; k++){
 				//printf("rank:%d(%d %d %d):%f\n",0,k,j,i,p->prev[i*p->n1*p->n2 + j*p->n1 + k]);
-				printf("(%d %d %d):%.3f\n",k,j,i,res[k][j][i]);
+		//		printf("(%d %d %d):%.3f\n",k,j,i,res[k][j][i]);
 			}
 		}
 	}
