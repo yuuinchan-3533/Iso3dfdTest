@@ -180,14 +180,24 @@ void initiate_mpi_x_y(float *ptr_prev, float *ptr_next, float *ptr_vel, Paramete
 				ptr_prev[key] = sin((x + xOffSet) * 100 + (y + yOffSet) * 10 + z);
 				ptr_next[key] = cos((x + xOffSet) * 100 + (y + yOffSet) * 10 + z);
 				ptr_vel[key] = 2250000.0f * DT * DT;
-				if(x>=HALF_LENGTH&&x<xDivisionSize+HALF_LENGTH){
+				if(x < HALF_LENGTH){
+					p->prevHalo[key] = ptr_prev[key];
+					p->nextHalo[key] = ptr_next[key];
+
+				}
+				else if(x>=HALF_LENGTH&&x<xDivisionSize+HALF_LENGTH){
 					p->sendBlock[(x - HALF_LENGTH) * n2n3 + y * n3 + z] = ptr_next[x * n2n3 + y * n3 + z];
+					
 				}
 				//printf("prev:%.3f\n",ptr_next[x * n2n3 + y * n3 + z]);
 			
-				if (x >= xDivisionSize&&x < xDivisionSize + HALF_LENGTH)
+				else if (x >= xDivisionSize&&x < xDivisionSize + HALF_LENGTH)
 				{
 					p->sendBlock[(x - xDivisionSize + HALF_LENGTH) * n2n3 + y * n3 + z] = ptr_next[x * n2n3 + y * n3 + z];
+				}
+				else{
+					p->prevHalo[(x - xDivisionSize) * n2n3 + y * n3 + z] = ptr_prev[key];
+					p->nextHalo[(x - xDivisionSize) * n2n3 + y * n3 + z] = ptr_next[key];
 				}
 				//printf("rank:%d (%d %d %d) prev:%.3f\n",rank,(x+xOffSet),(y+yOffSet),z,ptr_next[x * n2n3 + y * n3 + z]);
 			
