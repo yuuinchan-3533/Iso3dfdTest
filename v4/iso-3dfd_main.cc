@@ -60,7 +60,7 @@ void initialize(float* ptr_prev, float* ptr_next, float* ptr_vel, Parameters* p,
 				ptr_prev[i*p->n2*p->n1 + j*p->n1 + k] = sin(i*100+j*10+k);
 				ptr_next[i*p->n2*p->n1 + j*p->n1 + k] = cos(i*100+j*10+k);
 				ptr_vel[i*p->n2*p->n1 + j*p->n1 + k] = 2250000.0f*DT*DT;//Integration of the v² and dt² here
-				//printf("(%d %d %d):%.3f %.3f\n",k,j,i,ptr_prev[i*p->n2*p->n1 + j*p->n1 + k],ptr_next[i*p->n2*p->n1 + j*p->n1 + k]);
+				printf("(%d %d %d):%.3f %.3f\n",k,j,i,ptr_prev[i*p->n2*p->n1 + j*p->n1 + k],ptr_next[i*p->n2*p->n1 + j*p->n1 + k]);
 			}
 		}
 	}

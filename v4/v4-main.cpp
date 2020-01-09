@@ -116,7 +116,7 @@ void output_halo(const int n3,const int yDivisionSize,Parameters *p){
 	for(int ix=0;ix<2*HALF_LENGTH;ix++){
 		for(int iy=0;iy<2*HALF_LENGTH+yDivisionSize;iy++){
 			for(int iz=0;iz<n3;iz++){
-				printf("halo_rank:%d (%d %d %d) %.2f\n",rank,ix,iy,iz,p->nextHalo[ix]);
+//				printf("halo_rank:%d (%d %d %d) %.2f\n",rank,ix,iy,iz,p->nextHalo[ix]);
 			}
 
 		}
@@ -177,8 +177,8 @@ void initiate_mpi_x_y(float *ptr_prev, float *ptr_next, float *ptr_vel, Paramete
 			{
 
 				int key = x * n2n3 + y * n3 + z;
-				ptr_prev[key] = sin((x + xOffSet) * 100 + (y + yOffSet) * 10 + z);
-				ptr_next[key] = cos((x + xOffSet) * 100 + (y + yOffSet) * 10 + z);
+				ptr_prev[key] = sin((x + xOffSet) * 1 + (y + yOffSet) * 10 + z*100);
+				ptr_next[key] = cos((x + xOffSet) * 1 + (y + yOffSet) * 10 + z*100);
 				ptr_vel[key] = 2250000.0f * DT * DT;
 				if(x < HALF_LENGTH){
 					p->prevHalo[key] = ptr_prev[key];
@@ -199,7 +199,7 @@ void initiate_mpi_x_y(float *ptr_prev, float *ptr_next, float *ptr_vel, Paramete
 					p->prevHalo[(x - xDivisionSize) * n2n3 + y * n3 + z] = ptr_prev[key];
 					p->nextHalo[(x - xDivisionSize) * n2n3 + y * n3 + z] = ptr_next[key];
 				}
-				//printf("rank:%d (%d %d %d) prev:%.3f\n",rank,(x+xOffSet),(y+yOffSet),z,ptr_next[x * n2n3 + y * n3 + z]);
+//				printf("rank:%d (%d %d %d) prev:%.3f\n",rank,(x+xOffSet),(y+yOffSet),z,ptr_next[x * n2n3 + y * n3 + z]);
 			
 			}
 		}
@@ -442,7 +442,7 @@ int main(int argc, char **argv)
 	int xOffSet = (rank % xProcessNum) * xBlockSize;
 	int yOffSet = (rank / xProcessNum) * yBlockSize;
 	
-	for (int step = 0; step < /*p.nreps*/ 2; step++)
+	for (int step = 0; step < /*p.nreps*/ 4; step++)
 	{
 		//reference_implementation_mpi_2D(float *next, float *prev, float *coeff, float *vel, float *preHalo,const int n3, const int half_length, const int xDivisionSize, const int yDivisionSize)
 		reference_implementation_mpi_2D(p.next, p.prev, coeff, p.vel, p.prevHalo, p.n3, HALF_LENGTH, xDivisionSize, yDivisionSize,xOffSet,yOffSet,rank);
@@ -466,16 +466,16 @@ int main(int argc, char **argv)
 
 		//printf("send down success");
 		MPI_Sendrecv(&p.next[nowSend2Up], HALF_LENGTH * p.n2 * p.n3, MPI_FLOAT, up, 1, &p.next[nowRecvDown], HALF_LENGTH * p.n2 * p.n3, MPI_FLOAT, down, 1, MPI_COMM_WORLD, &status);
-		printf("send up success\n");
+//		printf("send up success\n");
 		//更新now进程的下halo区,更新next进程的上halo区
 		MPI_Sendrecv(&p.next[nowSend2Down], HALF_LENGTH * p.n2 * p.n3, MPI_FLOAT, down, 1, &p.next[nowRecvUp], HALF_LENGTH * p.n2 * p.n3, MPI_FLOAT, up, 1, MPI_COMM_WORLD, &status); //上halo区
-		printf("send down success\n");
+//		printf("send down success\n");
 		
 		
 		MPI_Sendrecv(&p.sendBlock[nowSend2Left], haloSendSize, MPI_FLOAT, left, 1, &p.nextHalo[nowRecvRight], haloSendSize, MPI_FLOAT, right, 1, MPI_COMM_WORLD, &status);
-		printf("send left success\n");
+//		printf("send left success\n");
 		MPI_Sendrecv(&p.sendBlock[nowSend2Right], haloSendSize, MPI_FLOAT, right, 1, &p.nextHalo[nowRecvLeft], haloSendSize, MPI_FLOAT, left, 1, MPI_COMM_WORLD, &status);
-		printf("send right success\n");
+//		printf("send right success\n");
 		
 
 		float *temp;
