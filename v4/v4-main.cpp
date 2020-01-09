@@ -83,6 +83,33 @@ void output(Parameters *p, int blockSize, int rank)
 		}
 	}
 }
+
+void output_2D(Parameters *p,int rank,int xDivisionSize,int yDivisionSize){
+	int xOffSet = (rank % xProcessNum) * xBlockSize;
+	int yOffSet = (rank / xProcessNum) * yBlockSize;
+	int n2n3=(2*HALF_LENGTH+yDivisionSize)*p->n3;
+	for (int rk = 0; rk < pSize; rk++){
+                 fflush(stdout);
+                 MPI_Barrier(MPI_COMM_WORLD);
+                 if (rk == rank)
+                 {
+                         for (int x = HALF_LENGTH; x < HALF_LENGTH + xBlockSize; x++)
+                         {
+                                 for (int y = HALF_LENGTH; y < HALF_LENGTH + yBlockSize ; y++)
+                                 {
+                                         for (int z = 0; z < p->n3; z++)
+                                         {
+                                                 int key = x * n2n3 + y * p->n3 + z;
+                                                 printf("rank:%d(%d %d %d):%f\n",rank,x+xOffSet,y+yOffSet,z,p->prev[key]);
+                                                 //printf("(%d %d %d):%.3f\n", x, y, z + offset, p->prev[key]);
+                                         }
+                                 }
+                         }
+                 }
+         }
+
+
+}
 void output_halo(const int n3,const int yDivisionSize,Parameters *p){
 	printf("output_halo\n");
 	int n2n3=(2*HALF_LENGTH+yDivisionSize)*n3;
@@ -133,13 +160,15 @@ void initialize(float *ptr_prev, float *ptr_next, float *ptr_vel, Parameters *p,
 }
 void initiate_mpi_x_y(float *ptr_prev, float *ptr_next, float *ptr_vel, Parameters *p, int xDivisionSize, int yDivisionSize, int rank)
 {
-	printf("%s %d\n",__FILE__,__LINE__);
-	
+//	printf("%s %d\n",__FILE__,__LINE__);
+	//printf("rank:%d xProcessNum:%d xBlockSize:%d\n",rank,xProcessNum,xBlockSize);
 	int xOffSet = (rank % xProcessNum) * xBlockSize;
 	int yOffSet = (rank / xProcessNum) * yBlockSize;
 	int haloKey = -1;
 	int n3=p->n3;
 	int n2n3=(HALF_LENGTH + yDivisionSize + HALF_LENGTH)*n3;
+//	printf("%s %d\n",__FILE__,__LINE__);
+	
 	for (int x = 0; x < HALF_LENGTH + xDivisionSize + HALF_LENGTH; x++)
 	{
 		for (int y = 0; y < HALF_LENGTH + yDivisionSize + HALF_LENGTH; y++)
@@ -147,21 +176,26 @@ void initiate_mpi_x_y(float *ptr_prev, float *ptr_next, float *ptr_vel, Paramete
 			for (int z = 0; z < p->n3; z++)
 			{
 
-				int key = x * p->n2 * p->n3 + y * p->n3 + z;
+				int key = x * n2n3 + y * n3 + z;
 				ptr_prev[key] = sin((x + xOffSet) * 100 + (y + yOffSet) * 10 + z);
 				ptr_next[key] = cos((x + xOffSet) * 100 + (y + yOffSet) * 10 + z);
 				ptr_vel[key] = 2250000.0f * DT * DT;
 				if(x>=HALF_LENGTH&&x<xDivisionSize+HALF_LENGTH){
 					p->sendBlock[(x - HALF_LENGTH) * n2n3 + y * n3 + z] = ptr_next[x * n2n3 + y * n3 + z];
 				}
-
+				//printf("prev:%.3f\n",ptr_next[x * n2n3 + y * n3 + z]);
+			
 				if (x >= xDivisionSize&&x < xDivisionSize + HALF_LENGTH)
 				{
 					p->sendBlock[(x - xDivisionSize + HALF_LENGTH) * n2n3 + y * n3 + z] = ptr_next[x * n2n3 + y * n3 + z];
 				}
+				//printf("rank:%d (%d %d %d) prev:%.3f\n",rank,(x+xOffSet),(y+yOffSet),z,ptr_next[x * n2n3 + y * n3 + z]);
+			
 			}
 		}
 	}
+//	printf("%s %d\n",__FILE__,__LINE__);
+	
 }
 void initiate_params(int n1, int n2)
 {
@@ -323,7 +357,8 @@ int main(int argc, char **argv)
 	down = rank - xProcessNum;
 	xDivisionSize = xBlockSize;
 	yDivisionSize = yBlockSize;
-
+	
+	printf("xblocksize:%d yblocksize:%d\n",xBlockSize,yBlockSize);
 
 	printf("%s %d\n",__FILE__,__LINE__);
 	
@@ -369,9 +404,9 @@ int main(int argc, char **argv)
 		printf("  TEST FAILED!\n");
 		fflush(NULL);
 		exit(-1);
+			
 	}
 
-	printf("%s %d\n",__FILE__,__LINE__);
 	
 	// Align working vectors offsets
 	p.prev = &prev_base[16 + ALIGN_HALO_FACTOR + MASK_ALLOC_OFFSET(0)];
@@ -388,20 +423,22 @@ int main(int argc, char **argv)
 
 	//iso_3dfd(p.next, p.prev, p.vel, coeff, p.n1, p.n2, p.n3, p.num_threads, tmp_nreps, p.n1_Tblock, p.n2_Tblock, p.n3_Tblock);
 
-	printf("%s %d\n",__FILE__,__LINE__);
 	
-	initiate_mpi_x_y(p.prev, p.next, p.vel, &p, 2 * HALF_LENGTH + blockSize, blockSize, rank);
+	initiate_mpi_x_y(p.prev, p.next, p.vel, &p, xDivisionSize, yDivisionSize, rank);
 	wstart = walltime();
 	//MPI_Type_vector(HALF_LENGTH+yDivisionSize+HALF_LENGTH, HALF_LENGTH, HALF_LENGTH + xDivisionSize + HALF_LENGTH, MPI_FLOAT, &yHaloType);
 	//MPI_Type_commit(&yHaloType);
-	printf("initiate success\n");
+	//printf("initiate success\n");
+	
 	for (int step = 0; step < /*p.nreps*/ 4; step++)
 	{
 		//reference_implementation_mpi_2D(float *next, float *prev, float *coeff, float *vel, float *preHalo,const int n3, const int half_length, const int xDivisionSize, const int yDivisionSize)
 		reference_implementation_mpi_2D(p.next, p.prev, coeff, p.vel, p.prevHalo, p.n3, HALF_LENGTH, xDivisionSize, yDivisionSize);
-		//copy_next_to_send(float *next, float *send, const int half_length, const int xDivisionSize,const int yDivisionSize, const int n3)
+	
+		//copy_next_to_senfloat *next, float *send, const int half_length, const int xDivisionSize,const int yDivisionSize, const int n3)
 		copy_next_to_send(p.next, p.sendBlock, HALF_LENGTH, xDivisionSize, yDivisionSize, p.n3);
 
+	
 		int nowSend2Up = (HALF_LENGTH)*p.n3;
 		int nowRecvUp = 0;
 
@@ -416,29 +453,25 @@ int main(int argc, char **argv)
 		int haloSendSize = HALF_LENGTH * (HALF_LENGTH + yDivisionSize + HALF_LENGTH) * p.n3;
 
 		//printf("send down success");
-		//output_halo(p.n3,yDivisionSize,&p);
 		MPI_Sendrecv(&p.next[nowSend2Up], HALF_LENGTH * p.n2 * p.n3, MPI_FLOAT, up, 1, &p.next[nowRecvDown], HALF_LENGTH * p.n2 * p.n3, MPI_FLOAT, down, 1, MPI_COMM_WORLD, &status);
-		//printf("send up success");
+		printf("send up success\n");
 		//更新now进程的下halo区,更新next进程的上halo区
 		MPI_Sendrecv(&p.next[nowSend2Down], HALF_LENGTH * p.n2 * p.n3, MPI_FLOAT, down, 1, &p.next[nowRecvUp], HALF_LENGTH * p.n2 * p.n3, MPI_FLOAT, up, 1, MPI_COMM_WORLD, &status); //上halo区
-		//printf("send down success");
+		printf("send down success\n");
 		
-		//output_halo(p.n3,yDivisionSize,&p);
 		
 		MPI_Sendrecv(&p.sendBlock[nowSend2Left], haloSendSize, MPI_FLOAT, left, 1, &p.nextHalo[nowRecvRight], haloSendSize, MPI_FLOAT, right, 1, MPI_COMM_WORLD, &status);
-		printf("send left success");
+		printf("send left success\n");
 		MPI_Sendrecv(&p.sendBlock[nowSend2Right], haloSendSize, MPI_FLOAT, right, 1, &p.nextHalo[nowRecvLeft], haloSendSize, MPI_FLOAT, left, 1, MPI_COMM_WORLD, &status);
-		printf("send right success");
+		printf("send right success\n");
 		
-		output_halo(p.n3,yDivisionSize,&p);		
 
 		float *temp;
 		temp = p.next;
 		p.next = p.prev;
 		p.prev = temp;
 	}
-	//printf("hhhhhhhhhhhhhhhhhhhhh");
-	output(&p, blockSize, rank);
+	output_2D(&p, rank,xDivisionSize,yDivisionSize);
 	MPI_Finalize();
 	wstop = walltime();
 

@@ -173,7 +173,7 @@ void reference_implementation_mpi_2D(float *next, float *prev, float *coeff, flo
             res += coeff[ir] * (prevLeft + prevRight); // in front / behind
           }
           next[ix * n2n3 + iy * n3 + iz] = 2.0f * prev[ix * n2n3 + iy * n3 + iz] - next[ix * n2n3 + iy * n3 + iz] + res * vel[ix * n2n3 + iy * n3 + iz];
-          //printf("(%d %d %d):prev:%.3f next:%.3f vel:%.3f\n",)
+          //printf("(%d %d %d):prev:%.3f next:%.3f vel:%.3f\n",ix,iy,iz,prev[ix*n2n3+iy*n3+iz],next[ix*n2n3+iy*n3+iz],vel[ix*n2n3+iy*n3+iz]);
         }
       }
     }
@@ -196,12 +196,12 @@ void copy_next_to_send(float *next, float *send, const int half_length, const in
 	key=(ix - half_length) * n2n3 + iy * n3 + iz;
         send[(ix - half_length) * n2n3 + iy * n3 + iz] = next[ix * n2n3 + iy * n3 + iz];
       }
-	printf("(%d,%d,%d):%.3f\n",ix,iy,iz,send[key]);
+	//printf("copy_next_to_send(%d,%d,%d):%.3f\n",ix,iy,iz,send[key]);
       for (ix = xDivisionSize;ix<xDivisionSize+half_length;ix++){
 	key=(ix - xDivisionSize + half_length) * n2n3 + iy * n3 + iz;
         send[(ix - xDivisionSize + half_length) * n2n3 + iy * n3 + iz] = next[ix * n2n3 + iy * n3 + iz];
       }
-	printf("(%d,%d,%d):%.3f\n",ix,iy,iz,send[key]);
+	//printf("copy_next_to_send(%d,%d,%d):%.3f\n",ix,iy,iz,send[key]);
     }
   }
 }
