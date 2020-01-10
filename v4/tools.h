@@ -180,13 +180,13 @@ void reference_implementation_mpi_2D(float *next, float *prev, float *coeff, flo
             float prevLeft = prev[ix * n2n3 + iy * n3 + iz - ir * n2n3];
             float prevRight = prev[ix * n2n3 + iy * n3 + iz + ir * n2n3];
             
-            if (ix < 2 * half_length)
+            if (ix - ir < half_length)
             {
-              prevLeft = preHalo[(ix - half_length) * n2n3 + iy * n3 + iz];
+              prevLeft = preHalo[(ix - ir) * n2n3 + iy * n3 + iz];
             }
-            if (ix > xDivisionSize)
+            if (ix + ir > half_length+xDivisionSize)
             {
-              prevRight = preHalo[(ix - xDivisionSize + half_length) * n2n3 + iy * n3 + iz];
+              prevRight = preHalo[(ix + ir - xDivisionSize) * n2n3 + iy * n3 + iz];
             }
             res += coeff[ir] * (prevLeft + prevRight); // in front / behind
              if(ix==4&&iy==4&&iz==4){
