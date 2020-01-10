@@ -13832,5 +13832,17 @@ flops:           inf GFlops
 
 -------------------------------
 comparing one iteration to reference implementation result...
+rank:0(4 4 4):x+:-0.894 x-:-0.035
+rank:0(4 4 4):y+:0.999 y-:0.444
+rank:0(4 4 4):z+:-0.483 z-:-1.000
+rank:0(4 4 4):x+:-0.106 x-:0.822
+rank:0(4 4 4):y+:-0.817 y-:0.115
+rank:0(4 4 4):z+:0.026 z-:-0.865
+rank:0(4 4 4):x+:0.779 x-:0.923
+rank:0(4 4 4):y+:0.371 y-:-0.637
+rank:0(4 4 4):z+:0.529 z-:-0.491
+rank:0(4 4 4):x+:0.948 x-:0.176
+rank:0(4 4 4):y+:0.194 y-:0.954
+rank:0(4 4 4):z+:0.886 z-:0.018
   Result within epsilon
   TEST PASSED!
