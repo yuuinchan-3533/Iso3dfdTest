@@ -492,6 +492,10 @@ int main(int argc, char **argv)
 		temp = p.next;
 		p.next = p.prev;
 		p.prev = temp;
+
+		temp = p.nextHalo;
+		p.nextHalo=p.prevHalo;
+		p.prevHalo=temp;
 	}
 	output_2D(&p, rank,xDivisionSize,yDivisionSize);
 	output_res(&p);

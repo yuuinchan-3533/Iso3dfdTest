@@ -79,15 +79,15 @@ void reference_implementation(float *next, float *prev, float *coeff,
             
             res += coeff[ir] * (prev[iz * n1n2 + iy * n1 + ix + ir] + prev[iz * n1n2 + iy * n1 + ix - ir]);                     // horizontal
             if(ix==8&&iy==12&&iz==4){
-               printf("rank:%d(8 12 4):x+:%.3f x-:%.3f\n",0,ix,iy,iz,prev[iz * n1n2 + iy * n1 + ix + ir],prev[iz * n1n2 + iy * n1 + ix - ir]);
+               //printf("rank:%d(8 12 4):x+:%.3f x-:%.3f\n",0,ix,iy,iz,prev[iz * n1n2 + iy * n1 + ix + ir],prev[iz * n1n2 + iy * n1 + ix - ir]);
             }
             res += coeff[ir] * (prev[iz * n1n2 + iy * n1 + ix + ir * n1] + prev[iz * n1n2 + iy * n1 + ix - ir * n1]);           // vertical
             if(ix==8&&iy==12&&iz==4){
-              printf("rank:%d(8 12 4):y+:%.3f y-:%.3f\n",0,ix,iy,iz,prev[iz * n1n2 + iy * n1 + ix + ir * n1],prev[iz * n1n2 + iy * n1 + ix - ir * n1]);
+              //printf("rank:%d(8 12 4):y+:%.3f y-:%.3f\n",0,ix,iy,iz,prev[iz * n1n2 + iy * n1 + ix + ir * n1],prev[iz * n1n2 + iy * n1 + ix - ir * n1]);
             }
             res += coeff[ir] * (prev[iz * n1n2 + iy * n1 + ix + ir * n1 * n2] + prev[iz * n1n2 + iy * n1 + ix - ir * n1 * n2]); // in front / behind
             if(ix==8&&iy==12&&iz==4){
-              printf("rank:%d(8 12 4):z+:%.3f z-:%.3f\n",0,ix,iy,iz,prev[iz * n1n2 + iy * n1 + ix + ir * n1 * n2],prev[iz * n1n2 + iy * n1 + ix - ir * n1 * n2]);
+              //printf("rank:%d(8 12 4):z+:%.3f z-:%.3f\n",0,ix,iy,iz,prev[iz * n1n2 + iy * n1 + ix + ir * n1 * n2],prev[iz * n1n2 + iy * n1 + ix - ir * n1 * n2]);
             }
           }
           
@@ -171,11 +171,11 @@ void reference_implementation_mpi_2D(float *next, float *prev, float *coeff, flo
           {
             res += coeff[ir] * (prev[ix * n2n3 + iy * n3 + iz + ir] + prev[ix * n2n3 + iy * n3 + iz - ir]);
             if(ix==8&&iy==12&&iz==4){
-              printf("rank:%d(8 12 4):z+:%.3f z-:%.3f\n",0,ix,iy,iz,prev[ix * n2n3 + iy * n3 + iz + ir],prev[ix * n2n3 + iy * n3 + iz - ir]);
+              //printf("rank:%d(8 12 4):z+:%.3f z-:%.3f\n",0,ix,iy,iz,prev[ix * n2n3 + iy * n3 + iz + ir],prev[ix * n2n3 + iy * n3 + iz - ir]);
             }           // horizontal
             res += coeff[ir] * (prev[ix * n2n3 + iy * n3 + iz + ir * n3] + prev[ix * n2n3 + iy * n3 + iz - ir * n3]); // vertical
             if(ix==8&&iy==12&&iz==4){
-              printf("rank:%d(8 12 4):y+:%.3f y-:%.3f\n",0,ix,iy,iz,prev[ix * n2n3 + iy * n3 + iz + ir * n3],prev[ix * n2n3 + iy * n3 + iz - ir * n3]);
+              //printf("rank:%d(8 12 4):y+:%.3f y-:%.3f\n",0,ix,iy,iz,prev[ix * n2n3 + iy * n3 + iz + ir * n3],prev[ix * n2n3 + iy * n3 + iz - ir * n3]);
             }  
             float prevLeft = prev[ix * n2n3 + iy * n3 + iz - ir * n2n3];
             float prevRight = prev[ix * n2n3 + iy * n3 + iz + ir * n2n3];
@@ -190,7 +190,7 @@ void reference_implementation_mpi_2D(float *next, float *prev, float *coeff, flo
             }
             res += coeff[ir] * (prevLeft + prevRight); // in front / behind
             if(ix==8&&iy==12&&iz==4){
-              printf("rank:%d(8 12 4):x+:%.3f x-:%.3f\n",0,ix,iy,iz,prevRight,prevLeft);
+              //printf("rank:%d(8 12 4):x+:%.3f x-:%.3f\n",0,ix,iy,iz,prevRight,prevLeft);
             }  
           }
           
