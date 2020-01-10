@@ -149,6 +149,7 @@ void reference_implementation_mpi_x_y(float *next, float *prev, float *coeff, fl
 
 void reference_implementation_mpi_2D(float *next, float *prev, float *coeff, float *vel, float *preHalo, const int n3, const int half_length, const int xDivisionSize, const int yDivisionSize, const int xOffSet, const int yOffSet, const int rank)
 {
+  printf("calculate\n");
   int n2n3 = (2 * half_length + yDivisionSize) * n3;
 
   for (int ix = half_length; ix < half_length + xDivisionSize; ix++)
@@ -163,15 +164,9 @@ void reference_implementation_mpi_2D(float *next, float *prev, float *coeff, flo
           for (int ir = 1; ir <= half_length; ir++)
           {
             res += coeff[ir] * (prev[ix * n2n3 + iy * n3 + iz + ir] + prev[ix * n2n3 + iy * n3 + iz - ir]);
-            if (ix + xOffSet == 8 && iy + yOffSet == 12 && iz == 4)
-            {
-              printf("rank:%d(8 12 4):z+:%.3f z-:%.3f\n", 0, prev[ix * n2n3 + iy * n3 + iz + ir], prev[ix * n2n3 + iy * n3 + iz - ir]);
-            }                                                                                                         // horizontal
+                                                                                                        // horizontal
             res += coeff[ir] * (prev[ix * n2n3 + iy * n3 + iz + ir * n3] + prev[ix * n2n3 + iy * n3 + iz - ir * n3]); // vertical
-            if (ix + xOffSet == 8 && iy + yOffSet == 12 && iz == 4)
-            {
-              printf("rank:%d(8 12 4):y+:%.3f y-:%.3f\n", 0, prev[ix * n2n3 + iy * n3 + iz + ir * n3], prev[ix * n2n3 + iy * n3 + iz - ir * n3]);
-            }
+
             float prevLeft = prev[ix * n2n3 + iy * n3 + iz - ir * n2n3];
             float prevRight = prev[ix * n2n3 + iy * n3 + iz + ir * n2n3];
 
@@ -187,6 +182,9 @@ void reference_implementation_mpi_2D(float *next, float *prev, float *coeff, flo
             if (ix + xOffSet == 8 && iy + yOffSet == 12 && iz == 4)
             {
               printf("rank:%d(8 12 4):x+:%.3f x-:%.3f\n", 0, prevRight, prevLeft);
+              printf("rank:%d(8 12 4):y+:%.3f y-:%.3f\n", 0, prev[ix * n2n3 + iy * n3 + iz + ir * n3], prev[ix * n2n3 + iy * n3 + iz - ir * n3]);
+              printf("rank:%d(8 12 4):z+:%.3f z-:%.3f\n", 0, prev[ix * n2n3 + iy * n3 + iz + ir], prev[ix * n2n3 + iy * n3 + iz - ir]);
+
             }
           }
 
