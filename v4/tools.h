@@ -78,17 +78,17 @@ void reference_implementation(float *next, float *prev, float *coeff,
           {
             
             res += coeff[ir] * (prev[iz * n1n2 + iy * n1 + ix + ir] + prev[iz * n1n2 + iy * n1 + ix - ir]);                     // horizontal
-            if(ix==4&&iy==4&&iz==4){
-              printf("rank:%d(4 4 4):x+:%.3f x-:%.3f\n",0,ix,iy,iz,prev[iz * n1n2 + iy * n1 + ix + ir],prev[iz * n1n2 + iy * n1 + ix - ir]);
-            }
+  //          if(ix==4&&iy==4&&iz==4){
+  //            printf("rank:%d(4 4 4):x+:%.3f x-:%.3f\n",0,ix,iy,iz,prev[iz * n1n2 + iy * n1 + ix + ir],prev[iz * n1n2 + iy * n1 + ix - ir]);
+  //          }
             res += coeff[ir] * (prev[iz * n1n2 + iy * n1 + ix + ir * n1] + prev[iz * n1n2 + iy * n1 + ix - ir * n1]);           // vertical
-            if(ix==4&&iy==4&&iz==4){
-              printf("rank:%d(4 4 4):y+:%.3f y-:%.3f\n",0,ix,iy,iz,prev[iz * n1n2 + iy * n1 + ix + ir * n1],prev[iz * n1n2 + iy * n1 + ix - ir * n1]);
-            }
+  //          if(ix==4&&iy==4&&iz==4){
+  //            printf("rank:%d(4 4 4):y+:%.3f y-:%.3f\n",0,ix,iy,iz,prev[iz * n1n2 + iy * n1 + ix + ir * n1],prev[iz * n1n2 + iy * n1 + ix - ir * n1]);
+  //          }
             res += coeff[ir] * (prev[iz * n1n2 + iy * n1 + ix + ir * n1 * n2] + prev[iz * n1n2 + iy * n1 + ix - ir * n1 * n2]); // in front / behind
-            if(ix==4&&iy==4&&iz==4){
-              printf("rank:%d(4 4 4):z+:%.3f z-:%.3f\n",0,ix,iy,iz,prev[iz * n1n2 + iy * n1 + ix + ir * n1 * n2],prev[iz * n1n2 + iy * n1 + ix - ir * n1 * n2]);
-            }
+  //          if(ix==4&&iy==4&&iz==4){
+  //            printf("rank:%d(4 4 4):z+:%.3f z-:%.3f\n",0,ix,iy,iz,prev[iz * n1n2 + iy * n1 + ix + ir * n1 * n2],prev[iz * n1n2 + iy * n1 + ix - ir * n1 * n2]);
+  //          }
           }
           
           next[iz * n1n2 + iy * n1 + ix] = 2.0f * prev[iz * n1n2 + iy * n1 + ix] - next[iz * n1n2 + iy * n1 + ix] + res * vel[iz * n1n2 + iy * n1 + ix];
@@ -170,13 +170,13 @@ void reference_implementation_mpi_2D(float *next, float *prev, float *coeff, flo
           for (int ir = 1; ir <= half_length; ir++)
           {
             res += coeff[ir] * (prev[ix * n2n3 + iy * n3 + iz + ir] + prev[ix * n2n3 + iy * n3 + iz - ir]);
-            if(ix==4&&iy==4&&iz==4){
-              printf("rank:%d(4 4 4):z+:%.3f z-:%.3f\n",0,ix,iy,iz,prev[ix * n2n3 + iy * n3 + iz + ir],prev[ix * n2n3 + iy * n3 + iz - ir]);
-            }           // horizontal
+        //    if(ix==4&&iy==4&&iz==4){
+        //      printf("rank:%d(4 4 4):z+:%.3f z-:%.3f\n",0,ix,iy,iz,prev[ix * n2n3 + iy * n3 + iz + ir],prev[ix * n2n3 + iy * n3 + iz - ir]);
+        //    }           // horizontal
             res += coeff[ir] * (prev[ix * n2n3 + iy * n3 + iz + ir * n3] + prev[ix * n2n3 + iy * n3 + iz - ir * n3]); // vertical
-            if(ix==4&&iy==4&&iz==4){
-              printf("rank:%d(4 4 4):y+:%.3f y-:%.3f\n",0,ix,iy,iz,prev[ix * n2n3 + iy * n3 + iz + ir * n3],prev[ix * n2n3 + iy * n3 + iz - ir * n3]);
-            }  
+        //    if(ix==4&&iy==4&&iz==4){
+        //      printf("rank:%d(4 4 4):y+:%.3f y-:%.3f\n",0,ix,iy,iz,prev[ix * n2n3 + iy * n3 + iz + ir * n3],prev[ix * n2n3 + iy * n3 + iz - ir * n3]);
+        //    }  
             float prevLeft = prev[ix * n2n3 + iy * n3 + iz - ir * n2n3];
             float prevRight = prev[ix * n2n3 + iy * n3 + iz + ir * n2n3];
             
@@ -189,9 +189,9 @@ void reference_implementation_mpi_2D(float *next, float *prev, float *coeff, flo
               prevRight = preHalo[(ix + ir - xDivisionSize) * n2n3 + iy * n3 + iz];
             }
             res += coeff[ir] * (prevLeft + prevRight); // in front / behind
-             if(ix==4&&iy==4&&iz==4){
-              printf("rank:%d(4 4 4):x+:%.3f x-:%.3f\n",0,ix,iy,iz,prevRight,prevLeft);
-            }  
+       //      if(ix==4&&iy==4&&iz==4){
+       //       printf("rank:%d(4 4 4):x+:%.3f x-:%.3f\n",0,ix,iy,iz,prevRight,prevLeft);
+       //     }  
           }
           
           next[ix * n2n3 + iy * n3 + iz] = 2.0f * prev[ix * n2n3 + iy * n3 + iz] - next[ix * n2n3 + iy * n3 + iz] + res * vel[ix * n2n3 + iy * n3 + iz];
