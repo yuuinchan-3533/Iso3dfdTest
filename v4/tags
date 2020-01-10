@@ -12,51 +12,72 @@ CSRCS	Makefile	/^CSRCS	= $(wildcard *.cc)$/;"	m
 MASK_ALLOC_OFFSET	iso-3dfd.h	50;"	d
 MAX	iso-3dfd.h	68;"	d
 MIN	iso-3dfd.h	69;"	d
-N2_TBLOCK	iso-3dfd_main.cc	102;"	d	file:
-N2_TBLOCK	v3-main.cpp	126;"	d	file:
-N3_TBLOCK	iso-3dfd_main.cc	103;"	d	file:
-N3_TBLOCK	v3-main.cpp	127;"	d	file:
+N2_TBLOCK	iso-3dfd_main.cc	107;"	d	file:
+N2_TBLOCK	v4-main.cpp	266;"	d	file:
+N3_TBLOCK	iso-3dfd_main.cc	108;"	d	file:
+N3_TBLOCK	v4-main.cpp	267;"	d	file:
 OMP_N_THREADS	iso-3dfd.h	66;"	d
 OMP_SCHEDULE	iso-3dfd.h	62;"	d
-Parameters	iso-3dfd_main.cc	/^}Parameters; $/;"	t	typeref:struct:__anon1	file:
-Parameters	v3-main.cpp	/^}Parameters; $/;"	t	typeref:struct:__anon2	file:
+Parameters	iso-3dfd_main.cc	/^}Parameters; $/;"	t	typeref:struct:__anon2	file:
+Parameters	v4-main.cpp	/^} Parameters;$/;"	t	typeref:struct:__anon1	file:
 SPLIT_FD_LOOP	iso-3dfd.h	36;"	d
 _ISO_3DFD_INCLUDE	iso-3dfd.h	33;"	d
 _TOOLS_INCLUDE	tools.h	31;"	d
+_TOOLS_INCLUDE	tools_mpi.h	31;"	d
+copy_next_to_send	tools.h	/^void copy_next_to_send(float *next, float *send, const int half_length, const int xDivisionSize,const int yDivisionSize, const int n3)$/;"	f
 init_data	tools.h	/^void init_data(float *data, const int dimx, const int dimy, const int dimz)$/;"	f
+init_data	tools_mpi.h	/^void init_data(float *data, const int dimx, const int dimy, const int dimz)$/;"	f
 initialize	iso-3dfd_main.cc	/^void initialize(float* ptr_prev, float* ptr_next, float* ptr_vel, Parameters* p, size_t nbytes){$/;"	f
-initialize	v3-main.cpp	/^void initialize(float* ptr_prev, float* ptr_next, float* ptr_vel, Parameters* p, size_t nbytes){$/;"	f
-initialize_mpi	v3-main.cpp	/^void initialize_mpi(float* ptr_prev,float* ptr_next, float* ptr_vel,Parameters* p,size_t nbytes,int blockSize,int rank){$/;"	f
+initialize	v4-main.cpp	/^void initialize(float *ptr_prev, float *ptr_next, float *ptr_vel, Parameters *p, size_t nbytes)$/;"	f
+initiate_mpi_x_y	v4-main.cpp	/^void initiate_mpi_x_y(float *ptr_prev, float *ptr_next, float *ptr_vel, Parameters *p, int xDivisionSize, int yDivisionSize, int rank)$/;"	f
+initiate_params	v4-main.cpp	/^void initiate_params(int n1, int n2)$/;"	f
 iso_3dfd	iso-3dfd_parallel.cc	/^void iso_3dfd(float *ptr_next,  float *ptr_prev,  float *ptr_vel,   float *coeff,$/;"	f
 iso_3dfd_it	iso-3dfd_parallel.cc	/^void iso_3dfd_it(float *ptr_next,  float *ptr_prev,  float *ptr_vel,   float *coeff,$/;"	f
 main	iso-3dfd_main.cc	/^int main(int argc, char** argv)$/;"	f
-main	v3-main.cpp	/^int main(int argc, char** argv)$/;"	f
-n1	iso-3dfd_main.cc	/^	size_t n1;   	\/\/ First dimension$/;"	m	struct:__anon1	file:
-n1	v3-main.cpp	/^	size_t n1;   	\/\/ First dimension$/;"	m	struct:__anon2	file:
-n1_Tblock	iso-3dfd_main.cc	/^	size_t n1_Tblock;	\/\/ Thread blocking on 1st dimension$/;"	m	struct:__anon1	file:
-n1_Tblock	v3-main.cpp	/^	size_t n1_Tblock;	\/\/ Thread blocking on 1st dimension$/;"	m	struct:__anon2	file:
-n2	iso-3dfd_main.cc	/^	size_t n2;   	\/\/ Second dimension$/;"	m	struct:__anon1	file:
-n2	v3-main.cpp	/^	size_t n2;   	\/\/ Second dimension$/;"	m	struct:__anon2	file:
-n2_Tblock	iso-3dfd_main.cc	/^	size_t n2_Tblock;	\/\/ Thread blocking on 2nd dimension$/;"	m	struct:__anon1	file:
-n2_Tblock	v3-main.cpp	/^	size_t n2_Tblock;	\/\/ Thread blocking on 2nd dimension$/;"	m	struct:__anon2	file:
-n3	iso-3dfd_main.cc	/^	size_t n3;   	\/\/ Third dimension$/;"	m	struct:__anon1	file:
-n3	v3-main.cpp	/^	size_t n3;   	\/\/ Third dimension$/;"	m	struct:__anon2	file:
-n3_Tblock	iso-3dfd_main.cc	/^	size_t n3_Tblock;	\/\/ Thread blocking on 3rd dimension$/;"	m	struct:__anon1	file:
-n3_Tblock	v3-main.cpp	/^	size_t n3_Tblock;	\/\/ Thread blocking on 3rd dimension$/;"	m	struct:__anon2	file:
-next	iso-3dfd_main.cc	/^	float *next;$/;"	m	struct:__anon1	file:
-next	v3-main.cpp	/^	float *next;$/;"	m	struct:__anon2	file:
-nreps	iso-3dfd_main.cc	/^	int nreps;     	\/\/ number of time-steps, over which performance is averaged$/;"	m	struct:__anon1	file:
-nreps	v3-main.cpp	/^	int nreps;     	\/\/ number of time-steps, over which performance is averaged$/;"	m	struct:__anon2	file:
-num_threads	iso-3dfd_main.cc	/^	int num_threads;$/;"	m	struct:__anon1	file:
-num_threads	v3-main.cpp	/^	int num_threads;$/;"	m	struct:__anon2	file:
+main	v4-main.cpp	/^int main(int argc, char **argv)$/;"	f
+n1	iso-3dfd_main.cc	/^	size_t n1;   	\/\/ First dimension$/;"	m	struct:__anon2	file:
+n1	v4-main.cpp	/^	size_t n1; \/\/ First dimension$/;"	m	struct:__anon1	file:
+n1_Tblock	iso-3dfd_main.cc	/^	size_t n1_Tblock;	\/\/ Thread blocking on 1st dimension$/;"	m	struct:__anon2	file:
+n1_Tblock	v4-main.cpp	/^	size_t n1_Tblock; \/\/ Thread blocking on 1st dimension$/;"	m	struct:__anon1	file:
+n2	iso-3dfd_main.cc	/^	size_t n2;   	\/\/ Second dimension$/;"	m	struct:__anon2	file:
+n2	v4-main.cpp	/^	size_t n2; \/\/ Second dimension$/;"	m	struct:__anon1	file:
+n2_Tblock	iso-3dfd_main.cc	/^	size_t n2_Tblock;	\/\/ Thread blocking on 2nd dimension$/;"	m	struct:__anon2	file:
+n2_Tblock	v4-main.cpp	/^	size_t n2_Tblock; \/\/ Thread blocking on 2nd dimension$/;"	m	struct:__anon1	file:
+n3	iso-3dfd_main.cc	/^	size_t n3;   	\/\/ Third dimension$/;"	m	struct:__anon2	file:
+n3	v4-main.cpp	/^	size_t n3; \/\/ Third dimension$/;"	m	struct:__anon1	file:
+n3_Tblock	iso-3dfd_main.cc	/^	size_t n3_Tblock;	\/\/ Thread blocking on 3rd dimension$/;"	m	struct:__anon2	file:
+n3_Tblock	v4-main.cpp	/^	size_t n3_Tblock; \/\/ Thread blocking on 3rd dimension$/;"	m	struct:__anon1	file:
+next	iso-3dfd_main.cc	/^	float *next;$/;"	m	struct:__anon2	file:
+next	v4-main.cpp	/^	float *next;$/;"	m	struct:__anon1	file:
+nextHalo	v4-main.cpp	/^	float *nextHalo;$/;"	m	struct:__anon1	file:
+nreps	iso-3dfd_main.cc	/^	int nreps;     	\/\/ number of time-steps, over which performance is averaged$/;"	m	struct:__anon2	file:
+nreps	v4-main.cpp	/^	int nreps;		  \/\/ number of time-steps, over which performance is averaged$/;"	m	struct:__anon1	file:
+num_threads	iso-3dfd_main.cc	/^	int num_threads;$/;"	m	struct:__anon2	file:
+num_threads	v4-main.cpp	/^	int num_threads;$/;"	m	struct:__anon1	file:
 output	iso-3dfd_main.cc	/^void output(Parameters* p){$/;"	f
-output	v3-main.cpp	/^void output(Parameters* p,int blockSize,int rank){$/;"	f
-pSize	v3-main.cpp	/^int rank, pSize; \/\/rank：当前进程ID，pSize：总的进程数$/;"	v
-prev	iso-3dfd_main.cc	/^	float *prev;	$/;"	m	struct:__anon1	file:
-prev	v3-main.cpp	/^	float *prev;	$/;"	m	struct:__anon2	file:
-rank	v3-main.cpp	/^int rank, pSize; \/\/rank：当前进程ID，pSize：总的进程数$/;"	v
-reference_implementation	tools.h	/^void reference_implementation(float *next, float *prev, float *coeff, $/;"	f
-vel	iso-3dfd_main.cc	/^	float *vel;$/;"	m	struct:__anon1	file:
-vel	v3-main.cpp	/^	float *vel;$/;"	m	struct:__anon2	file:
+output	v4-main.cpp	/^void output(Parameters *p, int blockSize, int rank)$/;"	f
+output_2D	v4-main.cpp	/^void output_2D(Parameters *p,int rank,int xDivisionSize,int yDivisionSize){$/;"	f
+output_halo	v4-main.cpp	/^void output_halo(const int n3,const int yDivisionSize,Parameters *p){$/;"	f
+output_res	v4-main.cpp	/^void output_res(Parameters *p){$/;"	f
+pSize	v4-main.cpp	/^int rank, pSize;			  \/\/rank：当前进程ID，pSize：总的进程数$/;"	v
+prev	iso-3dfd_main.cc	/^	float *prev;	$/;"	m	struct:__anon2	file:
+prev	v4-main.cpp	/^	float *prev;$/;"	m	struct:__anon1	file:
+prevHalo	v4-main.cpp	/^	float *prevHalo; \/\/prev的halo区，prevHalo[0~HALF_LENGTH][y][z]为左halo区，prevHalo[HALF_LENGTH~2*HALF_LENGTH][y][z]为右halo区$/;"	m	struct:__anon1	file:
+rank	v4-main.cpp	/^int rank, pSize;			  \/\/rank：当前进程ID，pSize：总的进程数$/;"	v
+reference_implementation	tools.h	/^void reference_implementation(float *next, float *prev, float *coeff,$/;"	f
+reference_implementation	tools_mpi.h	/^void reference_implementation(float *next, float *prev, float *coeff, $/;"	f
+reference_implementation_mpi	tools.h	/^void reference_implementation_mpi(float *next, float *prev, float *coeff, float *vel, const int n1, const int n2, const int n3, const int half_length, const int blockSize)$/;"	f
+reference_implementation_mpi_2D	tools.h	/^void reference_implementation_mpi_2D(float *next, float *prev, float *coeff, float *vel, float *preHalo,const int n3, const int half_length, const int xDivisionSize, const int yDivisionSize,const int xOffSet,const int yOffSet,const int rank)$/;"	f
+reference_implementation_mpi_x_y	tools.h	/^void reference_implementation_mpi_x_y(float *next, float *prev, float *coeff, float *vel, const int n1, const int n2, const int n3, const int half_length, const int blockSize)$/;"	f
+res	v4-main.cpp	/^float res[50][50][50];$/;"	v
+sendBlock	v4-main.cpp	/^	float *sendBlock; \/\/需要被发送的数据区域，send[0~HALF_LENGTH][y][z]为向left传递的数据区，send[HALF_LENGTH~2*HALF_LENGTH][y][z]为向right传递的数据区$/;"	m	struct:__anon1	file:
+vel	iso-3dfd_main.cc	/^	float *vel;$/;"	m	struct:__anon2	file:
+vel	v4-main.cpp	/^	float *vel;$/;"	m	struct:__anon1	file:
 walltime	tools.h	/^double walltime() \/\/ seconds$/;"	f
-within_epsilon	tools.h	/^bool within_epsilon(float* output, float *reference, const int dimx, const int dimy, const int dimz, const int radius, const int zadjust=0, const float delta=0.0001f )$/;"	f
+walltime	tools_mpi.h	/^double walltime() \/\/ seconds$/;"	f
+within_epsilon	tools.h	/^bool within_epsilon(float *output, float *reference, const int dimx, const int dimy, const int dimz, const int radius, const int zadjust = 0, const float delta = 0.0001f)$/;"	f
+within_epsilon	tools_mpi.h	/^bool within_epsilon(float* output, float *reference, const int dimx, const int dimy, const int dimz, const int radius, const int zadjust=0, const float delta=0.0001f )$/;"	f
+xBlockSize	v4-main.cpp	/^int xBlockSize, yBlockSize;   \/\/x轴每个进程算的格点数,y轴每个进程算得格点数$/;"	v
+xProcessNum	v4-main.cpp	/^int xProcessNum, yProcessNum; \/\/x轴上划分的进程数、y轴上划分的进程数$/;"	v
+yBlockSize	v4-main.cpp	/^int xBlockSize, yBlockSize;   \/\/x轴每个进程算的格点数,y轴每个进程算得格点数$/;"	v
+yProcessNum	v4-main.cpp	/^int xProcessNum, yProcessNum; \/\/x轴上划分的进程数、y轴上划分的进程数$/;"	v
