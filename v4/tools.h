@@ -76,24 +76,17 @@ void reference_implementation(float *next, float *prev, float *coeff,
           float res = prev[iz * n1n2 + iy * n1 + ix] * coeff[0];
           for (int ir = 1; ir <= half_length; ir++)
           {
+
+            res += coeff[ir] * (prev[iz * n1n2 + iy * n1 + ix + ir] + prev[iz * n1n2 + iy * n1 + ix - ir]); // horizontal
             
-            res += coeff[ir] * (prev[iz * n1n2 + iy * n1 + ix + ir] + prev[iz * n1n2 + iy * n1 + ix - ir]);                     // horizontal
-            if(ix==8&&iy==12&&iz==4){
-               printf("rank:%d(8 12 4):x+:%.3f x-:%.3f\n",0,prev[iz * n1n2 + iy * n1 + ix + ir],prev[iz * n1n2 + iy * n1 + ix - ir]);
-            }
-            res += coeff[ir] * (prev[iz * n1n2 + iy * n1 + ix + ir * n1] + prev[iz * n1n2 + iy * n1 + ix - ir * n1]);           // vertical
-            if(ix==8&&iy==12&&iz==4){
-              printf("rank:%d(8 12 4):y+:%.3f y-:%.3f\n",0,prev[iz * n1n2 + iy * n1 + ix + ir * n1],prev[iz * n1n2 + iy * n1 + ix - ir * n1]);
-            }
+            res += coeff[ir] * (prev[iz * n1n2 + iy * n1 + ix + ir * n1] + prev[iz * n1n2 + iy * n1 + ix - ir * n1]); // vertical
+           
             res += coeff[ir] * (prev[iz * n1n2 + iy * n1 + ix + ir * n1 * n2] + prev[iz * n1n2 + iy * n1 + ix - ir * n1 * n2]); // in front / behind
-            if(ix==8&&iy==12&&iz==4){
-              printf("rank:%d(8 12 4):z+:%.3f z-:%.3f\n",0,prev[iz * n1n2 + iy * n1 + ix + ir * n1 * n2],prev[iz * n1n2 + iy * n1 + ix - ir * n1 * n2]);
-            }
+        
           }
-          
+
           next[iz * n1n2 + iy * n1 + ix] = 2.0f * prev[iz * n1n2 + iy * n1 + ix] - next[iz * n1n2 + iy * n1 + ix] + res * vel[iz * n1n2 + iy * n1 + ix];
           //printf("rank:%d(%d %d %d):prev:%.3f next:%.3f vel:%.3f\n",0,ix,iy,iz,prev[iz * n1n2 + iy * n1 + ix],next[iz * n1n2 + iy * n1 + ix],vel[iz * n1n2 + iy * n1 + ix]);
-
         }
       }
     }
@@ -154,9 +147,9 @@ void reference_implementation_mpi_x_y(float *next, float *prev, float *coeff, fl
   }
 }
 
-void reference_implementation_mpi_2D(float *next, float *prev, float *coeff, float *vel, float *preHalo,const int n3, const int half_length, const int xDivisionSize, const int yDivisionSize,const int xOffSet,const int yOffSet,const int rank)
+void reference_implementation_mpi_2D(float *next, float *prev, float *coeff, float *vel, float *preHalo, const int n3, const int half_length, const int xDivisionSize, const int yDivisionSize, const int xOffSet, const int yOffSet, const int rank)
 {
-  int n2n3 = (2*half_length+yDivisionSize) * n3;
+  int n2n3 = (2 * half_length + yDivisionSize) * n3;
 
   for (int ix = half_length; ix < half_length + xDivisionSize; ix++)
   {
@@ -170,30 +163,33 @@ void reference_implementation_mpi_2D(float *next, float *prev, float *coeff, flo
           for (int ir = 1; ir <= half_length; ir++)
           {
             res += coeff[ir] * (prev[ix * n2n3 + iy * n3 + iz + ir] + prev[ix * n2n3 + iy * n3 + iz - ir]);
-            if(ix+xOffSet==8&&iy+yOffSet==12&&iz==4){
-              printf("rank:%d(8 12 4):z+:%.3f z-:%.3f\n",0,prev[ix * n2n3 + iy * n3 + iz + ir],prev[ix * n2n3 + iy * n3 + iz - ir]);
-            }           // horizontal
+            if (ix + xOffSet == 8 && iy + yOffSet == 12 && iz == 4)
+            {
+              printf("rank:%d(8 12 4):z+:%.3f z-:%.3f\n", 0, prev[ix * n2n3 + iy * n3 + iz + ir], prev[ix * n2n3 + iy * n3 + iz - ir]);
+            }                                                                                                         // horizontal
             res += coeff[ir] * (prev[ix * n2n3 + iy * n3 + iz + ir * n3] + prev[ix * n2n3 + iy * n3 + iz - ir * n3]); // vertical
-            if(ix+xOffSet==8&&iy+yOffSet==12&&iz==4){
-              printf("rank:%d(8 12 4):y+:%.3f y-:%.3f\n",0,prev[ix * n2n3 + iy * n3 + iz + ir * n3],prev[ix * n2n3 + iy * n3 + iz - ir * n3]);
-            }  
+            if (ix + xOffSet == 8 && iy + yOffSet == 12 && iz == 4)
+            {
+              printf("rank:%d(8 12 4):y+:%.3f y-:%.3f\n", 0, prev[ix * n2n3 + iy * n3 + iz + ir * n3], prev[ix * n2n3 + iy * n3 + iz - ir * n3]);
+            }
             float prevLeft = prev[ix * n2n3 + iy * n3 + iz - ir * n2n3];
             float prevRight = prev[ix * n2n3 + iy * n3 + iz + ir * n2n3];
-            
+
             if (ix - ir < half_length)
             {
               prevLeft = preHalo[(ix - ir) * n2n3 + iy * n3 + iz];
             }
-            if (ix + ir > half_length+xDivisionSize)
+            if (ix + ir > half_length + xDivisionSize)
             {
               prevRight = preHalo[(ix + ir - xDivisionSize) * n2n3 + iy * n3 + iz];
             }
             res += coeff[ir] * (prevLeft + prevRight); // in front / behind
-            if(ix+xOffSet==8&&iy+yOffSet==12&&iz==4){
-              printf("rank:%d(8 12 4):x+:%.3f x-:%.3f\n",0,prevRight,prevLeft);
-            }  
+            if (ix + xOffSet == 8 && iy + yOffSet == 12 && iz == 4)
+            {
+              printf("rank:%d(8 12 4):x+:%.3f x-:%.3f\n", 0, prevRight, prevLeft);
+            }
           }
-          
+
           next[ix * n2n3 + iy * n3 + iz] = 2.0f * prev[ix * n2n3 + iy * n3 + iz] - next[ix * n2n3 + iy * n3 + iz] + res * vel[ix * n2n3 + iy * n3 + iz];
           //printf("rank:%d(%d %d %d):prev:%.3f next:%.3f vel:%.3f\n",rank,ix+xOffSet,iy+yOffSet,iz,prev[ix*n2n3+iy*n3+iz],next[ix*n2n3+iy*n3+iz],vel[ix*n2n3+iy*n3+iz]);
         }
@@ -202,12 +198,12 @@ void reference_implementation_mpi_2D(float *next, float *prev, float *coeff, flo
   }
 }
 
-void copy_next_to_send(float *next, float *send, const int half_length, const int xDivisionSize,const int yDivisionSize, const int n3)
+void copy_next_to_send(float *next, float *send, const int half_length, const int xDivisionSize, const int yDivisionSize, const int n3)
 {
 
   int n2n3 = (2 * half_length + yDivisionSize) * n3;
 
-  int key=-1;
+  int key = -1;
   int ix;
   for (int iy = half_length; iy < half_length + yDivisionSize; iy++)
   {
@@ -215,15 +211,16 @@ void copy_next_to_send(float *next, float *send, const int half_length, const in
     {
       for (ix = half_length; ix < 2 * half_length; ix++)
       {
-	key=(ix - half_length) * n2n3 + iy * n3 + iz;
+        key = (ix - half_length) * n2n3 + iy * n3 + iz;
         send[(ix - half_length) * n2n3 + iy * n3 + iz] = next[ix * n2n3 + iy * n3 + iz];
       }
-	//printf("copy_next_to_send(%d,%d,%d):%.3f\n",ix,iy,iz,send[key]);
-      for (ix = xDivisionSize;ix<xDivisionSize+half_length;ix++){
-	key=(ix - xDivisionSize + half_length) * n2n3 + iy * n3 + iz;
+      //printf("copy_next_to_send(%d,%d,%d):%.3f\n",ix,iy,iz,send[key]);
+      for (ix = xDivisionSize; ix < xDivisionSize + half_length; ix++)
+      {
+        key = (ix - xDivisionSize + half_length) * n2n3 + iy * n3 + iz;
         send[(ix - xDivisionSize + half_length) * n2n3 + iy * n3 + iz] = next[ix * n2n3 + iy * n3 + iz];
       }
-	//printf("copy_next_to_send(%d,%d,%d):%.3f\n",ix,iy,iz,send[key]);
+      //printf("copy_next_to_send(%d,%d,%d):%.3f\n",ix,iy,iz,send[key]);
     }
   }
 }

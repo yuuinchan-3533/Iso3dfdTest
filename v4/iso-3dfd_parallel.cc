@@ -32,31 +32,48 @@
 #include <omp.h>
 #include <stdio.h>
 
-void iso_3dfd_it(float *ptr_next,  float *ptr_prev,  float *ptr_vel,   float *coeff,
-	      const int n1, const int n2, const int n3, const int num_threads,
-	      const int n1_Tblock, const int n2_Tblock, const int n3_Tblock){
-	int dimn1n2 = n1*n2;//This value will be used later
-	#pragma omp parallel for OMP_SCHEDULE OMP_N_THREADS collapse(2) default(shared)	
-	for(int iz=0; iz<n3; iz++) {
-		for(int iy=0; iy<n2; iy++) {
-			for(int ix=0; ix<n1; ix++) {
+void iso_3dfd_it(float *ptr_next, float *ptr_prev, float *ptr_vel, float *coeff,
+				 const int n1, const int n2, const int n3, const int num_threads,
+				 const int n1_Tblock, const int n2_Tblock, const int n3_Tblock)
+{
+	int dimn1n2 = n1 * n2; //This value will be used later
+#pragma omp parallel for OMP_SCHEDULE OMP_N_THREADS collapse(2) default(shared)
+	for (int iz = 0; iz < n3; iz++)
+	{
+		for (int iy = 0; iy < n2; iy++)
+		{
+			for (int ix = 0; ix < n1; ix++)
+			{
 				//Try to avoid having a condition in a for loop
-				if( ix>=HALF_LENGTH && ix<(n1-HALF_LENGTH) && iy>=HALF_LENGTH && iy<(n2-HALF_LENGTH) && iz>=HALF_LENGTH && iz<(n3-HALF_LENGTH) ) {
-					int offset = iz*dimn1n2 + iy*n1 + ix;
+				if (ix >= HALF_LENGTH && ix < (n1 - HALF_LENGTH) && iy >= HALF_LENGTH && iy < (n2 - HALF_LENGTH) && iz >= HALF_LENGTH && iz < (n3 - HALF_LENGTH))
+				{
+					int offset = iz * dimn1n2 + iy * n1 + ix;
 					float value = 0.0;
-					value += ptr_prev[offset]*coeff[0];
-					for(int ir=1; ir<=HALF_LENGTH; ir++) {
-						value += coeff[ir] * (ptr_prev[offset + ir] + ptr_prev[offset - ir]);// horizontal
-						value += coeff[ir] * (ptr_prev[offset + ir*n1] + ptr_prev[offset - ir*n1]);// vertical
-						value += coeff[ir] * (ptr_prev[offset + ir*dimn1n2] + ptr_prev[offset - ir*dimn1n2]); // in front / behind
+					value += ptr_prev[offset] * coeff[0];
+					for (int ir = 1; ir <= HALF_LENGTH; ir++)
+					{
+						value += coeff[ir] * (ptr_prev[offset + ir] + ptr_prev[offset - ir]); // horizontal
+						if (ix == 8 && iy == 12 && iz == 4)
+						{
+							printf("rank:%d(8 12 4):x+:%.3f x-:%.3f\n", 0, prev[iz * n1n2 + iy * n1 + ix + ir], prev[iz * n1n2 + iy * n1 + ix - ir]);
+						}
+						value += coeff[ir] * (ptr_prev[offset + ir * n1] + ptr_prev[offset - ir * n1]); // vertical
+						if (ix == 8 && iy == 12 && iz == 4)
+						{
+							printf("rank:%d(8 12 4):y+:%.3f y-:%.3f\n", 0, prev[iz * n1n2 + iy * n1 + ix + ir * n1], prev[iz * n1n2 + iy * n1 + ix - ir * n1]);
+						}
+						value += coeff[ir] * (ptr_prev[offset + ir * dimn1n2] + ptr_prev[offset - ir * dimn1n2]); // in front / behind
+						if (ix == 8 && iy == 12 && iz == 4)
+						{
+							printf("rank:%d(8 12 4):z+:%.3f z-:%.3f\n", 0, prev[iz * n1n2 + iy * n1 + ix + ir * n1 * n2], prev[iz * n1n2 + iy * n1 + ix - ir * n1 * n2]);
+						}
 					}
-					ptr_next[offset] = 2.0f* ptr_prev[offset] - ptr_next[offset] + value*ptr_vel[offset];
+					ptr_next[offset] = 2.0f * ptr_prev[offset] - ptr_next[offset] + value * ptr_vel[offset];
 				}
 			}
 		}
 	}
 }
-
 
 /***************************************************************
  *
@@ -66,23 +83,22 @@ void iso_3dfd_it(float *ptr_next,  float *ptr_prev,  float *ptr_vel,   float *co
  *
  ***************************************************************/
 
-void iso_3dfd(float *ptr_next,  float *ptr_prev,  float *ptr_vel,   float *coeff,
-	      const int n1, const int n2, const int n3, const int num_threads, const int nreps,
-	      const int n1_Tblock, const int n2_Tblock, const int n3_Tblock){
- 
-  for(int it=0; it<nreps; it+=2){
+void iso_3dfd(float *ptr_next, float *ptr_prev, float *ptr_vel, float *coeff,
+			  const int n1, const int n2, const int n3, const int num_threads, const int nreps,
+			  const int n1_Tblock, const int n2_Tblock, const int n3_Tblock)
+{
 
-    iso_3dfd_it(ptr_next, ptr_prev, ptr_vel, coeff,
-		n1, n2, n3, num_threads, n1_Tblock, n2_Tblock, n3_Tblock);
+	for (int it = 0; it < nreps; it += 2)
+	{
 
-    // here's where boundary conditions+halo exchanges happen
+		iso_3dfd_it(ptr_next, ptr_prev, ptr_vel, coeff,
+					n1, n2, n3, num_threads, n1_Tblock, n2_Tblock, n3_Tblock);
 
-    // Swap previous & next between iterations
-    iso_3dfd_it(ptr_prev, ptr_next, ptr_vel, coeff,
-		n1, n2, n3, num_threads, n1_Tblock, n2_Tblock, n3_Tblock);
+		// here's where boundary conditions+halo exchanges happen
 
+		// Swap previous & next between iterations
+		iso_3dfd_it(ptr_prev, ptr_next, ptr_vel, coeff,
+					n1, n2, n3, num_threads, n1_Tblock, n2_Tblock, n3_Tblock);
 
-  } // time loop
+	} // time loop
 }
-
-
