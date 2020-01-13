@@ -298,7 +298,7 @@ void output_2D(Parameters *p, int rank, int xDivisionSize, int yDivisionSize,int
 					{
 
 						int key = z * n1*n2 + y * n1 + x;
-						printf("%d %d %d %.3f\n", x + xOffSet, y + yOffSet, z, p->prev[key]);
+						//printf("%d %d %d %.3f\n", x + xOffSet, y + yOffSet, z, p->prev[key]);
 						//printf("(%d %d %d):%.3f\n", x, y, z + offset, p->prev[key]);
 					}
 				}
