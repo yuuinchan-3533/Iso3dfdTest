@@ -288,7 +288,7 @@ void output_v5(Parameters *p, int rank, int xDivisionSize, int yDivisionSize)
 					for (int ix = HALF_LENGTH; ix < n1; ix++)
 					{
 						int key = iz * n1 * n2 + iy * n1 + ix; //[z][y][x]
-						printf("%d %d %d %.3f\n", ix + xOffSet, iy + yOffSet, iz, p->prev[key]);
+						printf("rank:%d(%d %d %d)%.3f\n",rank, ix + xOffSet, iy + yOffSet, iz, p->prev[key]);
 				//printf("initiate(%d %d %d):%.3f %.3f\n",ix+xOffSet,iy+yOffSet,iz,ptr_prev[key],ptr_next[key]);
 					}
 				}
