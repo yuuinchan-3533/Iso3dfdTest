@@ -84,12 +84,7 @@ void initiate_v5(float *ptr_prev, float *ptr_next, float *ptr_vel, Parameters *p
 		}
 	}
 }
-void copy_data_to_send_block(Parameters *p,int xDivisionSize, int yDivisionSize){
-	copy_data_to_left_send_block(p,xDivisionSize,yDivisionSize);
-	copy_data_to_right_send_block(p,xDivisionSize,yDivisionSize);
-	copy_data_to_up_send_block(p,xDivisionSize,yDivisionSize);
-	copy_data_to_down_send_block(p,xDivisionSize,yDivisionSize);
-}
+
 
 void copy_data_to_left_send_block(Parameters *p,int xDivisionSize, int yDivisionSize){
 	int n1=2*HALF_LENGTH+xDivisionSize;
@@ -212,7 +207,12 @@ void copy_data_to_down_halo(Parameters *p,int xDivisionSize, int yDivisionSize){
 		}
 	}
 }
-
+void copy_data_to_send_block(Parameters *p,int xDivisionSize, int yDivisionSize){
+	copy_data_to_left_send_block(p,xDivisionSize,yDivisionSize);
+	copy_data_to_right_send_block(p,xDivisionSize,yDivisionSize);
+	copy_data_to_up_send_block(p,xDivisionSize,yDivisionSize);
+	copy_data_to_down_send_block(p,xDivisionSize,yDivisionSize);
+}
 void update_halo(Parameters *p,int xDivisionSize, int yDivisionSize){
 	copy_data_to_left_halo(p,xDivisionSize,yDivisionSize);
 	copy_data_to_right_halo(p,xDivisionSize,yDivisionSize);
@@ -462,7 +462,7 @@ int main(int argc, char **argv)
 	size_t nsize_yDimension_halo = (2*HALF_LENGTH+xDivisionSize)*HALF_LENGTH*p.n3;
 	size_t nbytes = nsize_mpi * sizeof(float);
 	size_t nbytes_xDimension_halo = nsize_xDimension_halo * sizeof(float);
-	size_t nbytes_yDimension_halo = nsize_yDimension_halo * sizeof(float)
+	size_t nbytes_yDimension_halo = nsize_yDimension_halo * sizeof(float);
 
 	//printf("nsize_mpi:%d ,xDivisionSize:%d ,yDivisionSize:%d \n", nsize_mpi, xDivisionSize, yDivisionSize);
 	//printf("allocating prev, next and vel: total %g Mbytes\n", (3.0 * (nbytes + 16)) / (1024 * 1024));
@@ -547,7 +547,7 @@ int main(int argc, char **argv)
 		//		printf("send down success\n");
 
 		update_halo(&p,xDivisionSize,yDivisionSize);
-		
+
 		float *temp;
 		temp = p.next;
 		p.next = p.prev;
