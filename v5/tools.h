@@ -142,15 +142,15 @@ void reference_implementation_v5(float *next, float *prev, float *coeff, float *
             res += coeff[ir] * (prev[iz * n1n2 + iy * n1 + ix + ir * n1 * n2] + prev[iz * n1n2 + iy * n1 + ix - ir * n1 * n2]); // in front / behind
             if (ix + xOffSet == 4 && iy + yOffSet == 4 && iz == 4)
             {  //printf("x-:%d\n",iz*n1n2+iy*n1+ix-ir);
-               printf("checkrank:%d(4 4 4):x+:%.3f x-:%.3f\n", 0, prev[iz * n1n2 + iy * n1 + ix + ir], prev[iz * n1n2 + iy * n1 + ix - ir]);
-               printf("checkrank:%d(4 4 4):y+:%.3f y-:%.3f\n", 0, prev[iz * n1n2 + iy * n1 + ix + ir * n1], prev[iz * n1n2 + iy * n1 + ix - ir * n1]);
-               printf("checkrank:%d(4 4 4):z+:%.3f z-:%.3f\n", 0, prev[iz * n1n2 + iy * n1 + ix + ir * n1n2], prev[iz * n1n2 + iy * n1 + ix - ir *n1n2]);
+            //   printf("checkrank:%d(4 4 4):x+:%.3f x-:%.3f\n", 0, prev[iz * n1n2 + iy * n1 + ix + ir], prev[iz * n1n2 + iy * n1 + ix - ir]);
+            //   printf("checkrank:%d(4 4 4):y+:%.3f y-:%.3f\n", 0, prev[iz * n1n2 + iy * n1 + ix + ir * n1], prev[iz * n1n2 + iy * n1 + ix - ir * n1]);
+            //   printf("checkrank:%d(4 4 4):z+:%.3f z-:%.3f\n", 0, prev[iz * n1n2 + iy * n1 + ix + ir * n1n2], prev[iz * n1n2 + iy * n1 + ix - ir *n1n2]);
              }
 
 	 }
           next[iz * n1n2 + iy * n1 + ix] = 2.0f * prev[iz * n1n2 + iy * n1 + ix] - next[iz * n1n2 + iy * n1 + ix] + res * vel[iz * n1n2 + iy * n1 + ix];
           if(ix+xOffSet==4 && iy+yOffSet==4 && iz==4){
-	  	printf("rank:%d(%d %d %d):prev:%.3f next:%.3f res:%.3f\n",rank,ix+xOffSet,iy+yOffSet,iz,prev[iz * n1n2 + iy * n1 + ix],next[iz * n1n2 + iy * n1 + ix],res);
+	  //	printf("rank:%d(%d %d %d):prev:%.3f next:%.3f res:%.3f\n",rank,ix+xOffSet,iy+yOffSet,iz,prev[iz * n1n2 + iy * n1 + ix],next[iz * n1n2 + iy * n1 + ix],res);
           }
         }
       }
