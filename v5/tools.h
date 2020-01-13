@@ -142,8 +142,9 @@ void reference_implementation_v5(float *next, float *prev, float *coeff, float *
             res += coeff[ir] * (prev[iz * n1n2 + iy * n1 + ix + ir * n1 * n2] + prev[iz * n1n2 + iy * n1 + ix - ir * n1 * n2]); // in front / behind
           }
           next[iz * n1n2 + iy * n1 + ix] = 2.0f * prev[iz * n1n2 + iy * n1 + ix] - next[iz * n1n2 + iy * n1 + ix] + res * vel[iz * n1n2 + iy * n1 + ix];
-          printf("rank:%d(%d %d %d):prev:%.3f next:%.3f vel:%.3f\n",rank,ix+xOffSet,iy+yOffSet,iz,prev[iz * n1n2 + iy * n1 + ix],next[iz * n1n2 + iy * n1 + ix],vel[iz * n1n2 + iy * n1 + ix]);
-
+          if(ix+xOffSet==4 && iy+yOffSet==4 && iz==4){
+	  	printf("rank:%d(%d %d %d):prev:%.3f next:%.3f res:%.3f\n",rank,ix+xOffSet,iy+yOffSet,iz,prev[iz * n1n2 + iy * n1 + ix],next[iz * n1n2 + iy * n1 + ix],res);
+          }
         }
       }
     }
