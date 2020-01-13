@@ -283,12 +283,12 @@ void output_v5(Parameters *p, int rank, int xDivisionSize, int yDivisionSize)
 		{
 			for (int iz = HALF_LENGTH; iz < n3-HALF_LENGTH; iz++)
 			{
-				for (int iy = HALF_LENGTH; iy < n2; iy++)
+				for (int iy = HALF_LENGTH; iy < n2-HALF_LENGTH; iy++)
 				{
-					for (int ix = HALF_LENGTH; ix < n1; ix++)
+					for (int ix = HALF_LENGTH; ix < n1-HALF_LENGTH; ix++)
 					{
 						int key = iz * n1 * n2 + iy * n1 + ix; //[z][y][x]
-						printf("rank:%d(%d %d %d)%.3f\n",rank, ix + xOffSet, iy + yOffSet, iz, p->prev[key]);
+						printf("%d %d %d %.3f\n",ix + xOffSet, iy + yOffSet, iz, p->prev[key]);
 				//printf("initiate(%d %d %d):%.3f %.3f\n",ix+xOffSet,iy+yOffSet,iz,ptr_prev[key],ptr_next[key]);
 					}
 				}
