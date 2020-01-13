@@ -80,6 +80,7 @@ void initiate_v5(float *ptr_prev, float *ptr_next, float *ptr_vel, Parameters *p
 				ptr_prev[key] = sin((ix + xOffSet) * 1 + (iy + yOffSet) * 10 + iz * 100);
 				ptr_next[key] = cos((ix + xOffSet) * 1 + (iy + yOffSet) * 10 + iz * 100);
 				ptr_vel[key] = 2250000.0f * DT * DT;
+				printf("initiate(%d %d %d):%.3f %.3f\n",ix,iy,iz,ptr_prev[key],ptr_next[key]);
 			}
 		}
 	}
