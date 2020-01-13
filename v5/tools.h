@@ -120,15 +120,17 @@ void reference_implementation_mpi(float *next, float *prev, float *coeff, float 
   }
 }
 
-void reference_implementation_mpi_x_y(float *next, float *prev, float *coeff, float *vel, const int n1, const int n2, const int n3, const int half_length, const int blockSize)
+void reference_implementation_v5(float *next, float *prev, float *coeff, float *vel, const int xDivisionSize, const int yDivisionSize, const int n3, const int half_length, const int xOffSet, const int yOffSet, const int rank)
 {
+  int n1=2*half_length+xDivisionSize;
+  int n2=2*half_length+yDivisionSize;
   int n1n2 = n1 * n2;
 
   for (int iz = 0; iz < n3; iz++)
   {
-    for (int iy = HALF_LENGTH; iy < HALF_LENGTH + n2; iy++)
+    for (int iy = half_length; iy < half_length + yDivisionSize; iy++)
     {
-      for (int ix = HALF_LENGTH; ix < HALF_LENGTH + n1; ix++)
+      for (int ix = half_length; ix < half_length + xDivisionSize; ix++)
       {
         if (iz >= half_length && iz < (n3 - half_length))
         {

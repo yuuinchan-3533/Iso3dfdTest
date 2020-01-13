@@ -161,7 +161,7 @@ void copy_data_to_left_halo(Parameters *p,int xDivisionSize, int yDivisionSize){
 	for(ix=0;ix<HALF_LENGTH;ix++){
 		for(iy=0;iy<n2;iy++){
 			for(iz=0;iz<n3;iz++){
-				p->prev[iz*n2*n1+iy*n1+ix]=p->leftRecvBlock[ix*n2*n3+iy*n3+iz];
+				p->next[iz*n2*n1+iy*n1+ix]=p->leftRecvBlock[ix*n2*n3+iy*n3+iz];
 			}
 		}
 	}
@@ -177,7 +177,7 @@ void copy_data_to_right_halo(Parameters *p,int xDivisionSize, int yDivisionSize)
 	for(ix=0;ix<HALF_LENGTH;ix++){
 		for(iy=0;iy<n2;iy++){
 			for(iz=0;iz<n3;iz++){
-				p->prev[iz*n2*n1+iy*n1+ix+xDivisionSize+HALF_LENGTH]=p->rightRecvBlock[ix*n2*n3+iy*n3+iz];
+				p->next[iz*n2*n1+iy*n1+ix+xDivisionSize+HALF_LENGTH]=p->rightRecvBlock[ix*n2*n3+iy*n3+iz];
 			}
 		}
 	}
@@ -192,7 +192,7 @@ void copy_data_to_up_halo(Parameters *p,int xDivisionSize, int yDivisionSize){
 	for(iy=0;iy<HALF_LENGTH;iy++){
 		for(ix=0;ix<n1;ix++){
 			for(iz=0;iz<n3;iz++){
-				p->prev[iz*n2*n1+iy*n1+ix]=p->upRecvBlock[iy*n1*n3+ix*n3+iz];
+				p->next[iz*n2*n1+iy*n1+ix]=p->upRecvBlock[iy*n1*n3+ix*n3+iz];
 			}
 		}
 	}
@@ -207,10 +207,17 @@ void copy_data_to_down_halo(Parameters *p,int xDivisionSize, int yDivisionSize){
 	for(iy=0;iy<HALF_LENGTH;iy++){
 		for(ix=0;ix<n1;ix++){
 			for(iz=0;iz<n3;iz++){
-				p->prev[iz*n2*n1+(iy+yDivisionSize+HALF_LENGTH)*n1+ix]=p->downRecvBlock[iy*n1*n3+ix*n3+iz];
+				p->next[iz*n2*n1+(iy+yDivisionSize+HALF_LENGTH)*n1+ix]=p->downRecvBlock[iy*n1*n3+ix*n3+iz];
 			}
 		}
 	}
+}
+
+void update_halo(Parameters *p,int xDivisionSize, int yDivisionSize){
+	copy_data_to_left_halo(p,xDivisionSize,yDivisionSize);
+	copy_data_to_right_halo(p,xDivisionSize,yDivisionSize);
+	copy_data_to_up_halo(p,xDivisionSize,yDivisionSize);
+	copy_data_to_down_halo(p,xDivisionSize,yDivisionSize);
 }
 
 void output_v5(Parameters *p, int rank, int xDivisionSize, int yDivisionSize)
@@ -538,10 +545,14 @@ int main(int argc, char **argv)
 
 		MPI_Sendrecv(&p.rightSendBlock[0], HALF_LENGTH*(2*HALF_LENGTH+yDivisionSize)*p.n3, MPI_FLOAT, right, 1, &p.rightRecvBlock[0], HALF_LENGTH*(2*HALF_LENGTH+yDivisionSize)*p.n3, MPI_FLOAT, left, 1, MPI_COMM_WORLD, &status);
 		//		printf("send down success\n");
+
+		update_halo(&p,xDivisionSize,yDivisionSize);
+		
 		float *temp;
 		temp = p.next;
 		p.next = p.prev;
 		p.prev = temp;
+	
 
 	}
 	//void output_v5(Parameters *p, int rank, int xDivisionSize, int yDivisionSize)
