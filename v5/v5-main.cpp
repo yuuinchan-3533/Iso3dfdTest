@@ -544,7 +544,7 @@ int main(int argc, char **argv)
 		MPI_Sendrecv(&p.leftSendBlock[0], HALF_LENGTH*(2*HALF_LENGTH+yDivisionSize)*p.n3, MPI_FLOAT, left, 1, &p.rightRecvBlock[0], HALF_LENGTH*(2*HALF_LENGTH+yDivisionSize)*p.n3, MPI_FLOAT, right, 1, MPI_COMM_WORLD, &status);
 		//		printf("send up success\n");
 
-		MPI_Sendrecv(&p.rightSendBlock[0], HALF_LENGTH*(2*HALF_LENGTH+yDivisionSize)*p.n3, MPI_FLOAT, right, 1, &p.rightRecvBlock[0], HALF_LENGTH*(2*HALF_LENGTH+yDivisionSize)*p.n3, MPI_FLOAT, left, 1, MPI_COMM_WORLD, &status);
+		MPI_Sendrecv(&p.rightSendBlock[0], HALF_LENGTH*(2*HALF_LENGTH+yDivisionSize)*p.n3, MPI_FLOAT, right, 1, &p.leftRecvBlock[0], HALF_LENGTH*(2*HALF_LENGTH+yDivisionSize)*p.n3, MPI_FLOAT, left, 1, MPI_COMM_WORLD, &status);
 		//		printf("send down success\n");
 
 		update_halo(&p,xDivisionSize,yDivisionSize);
