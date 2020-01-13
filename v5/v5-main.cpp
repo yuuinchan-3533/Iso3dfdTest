@@ -179,7 +179,7 @@ void copy_data_to_left_halo(Parameters *p, int xDivisionSize, int yDivisionSize)
 		{
 			for (iz = 0; iz < n3; iz++)
 			{
-				p->next[iz * n2 * n1 + iy * n1 + ix] = p->leftRecvBlock[ix * n2 * n3 + iy * n3 + iz];
+				p->prev[iz * n2 * n1 + iy * n1 + ix] = p->leftRecvBlock[ix * n2 * n3 + iy * n3 + iz];
 			}
 		}
 	}
@@ -198,7 +198,7 @@ void copy_data_to_right_halo(Parameters *p, int xDivisionSize, int yDivisionSize
 		{
 			for (iz = 0; iz < n3; iz++)
 			{
-				p->next[iz * n2 * n1 + iy * n1 + ix + xDivisionSize + HALF_LENGTH] = p->rightRecvBlock[ix * n2 * n3 + iy * n3 + iz];
+				p->prev[iz * n2 * n1 + iy * n1 + ix + xDivisionSize + HALF_LENGTH] = p->rightRecvBlock[ix * n2 * n3 + iy * n3 + iz];
 			}
 		}
 	}
@@ -217,7 +217,7 @@ void copy_data_to_up_halo(Parameters *p, int xDivisionSize, int yDivisionSize)
 		{
 			for (iz = 0; iz < n3; iz++)
 			{
-				p->next[iz * n2 * n1 + iy * n1 + ix] = p->upRecvBlock[iy * n1 * n3 + ix * n3 + iz];
+				p->prev[iz * n2 * n1 + iy * n1 + ix] = p->upRecvBlock[iy * n1 * n3 + ix * n3 + iz];
 			}
 		}
 	}
@@ -236,7 +236,7 @@ void copy_data_to_down_halo(Parameters *p, int xDivisionSize, int yDivisionSize)
 		{
 			for (iz = 0; iz < n3; iz++)
 			{
-				p->next[iz * n2 * n1 + (iy + yDivisionSize + HALF_LENGTH) * n1 + ix] = p->downRecvBlock[iy * n1 * n3 + ix * n3 + iz];
+				p->prev[iz * n2 * n1 + (iy + yDivisionSize + HALF_LENGTH) * n1 + ix] = p->downRecvBlock[iy * n1 * n3 + ix * n3 + iz];
 			}
 		}
 	}
@@ -258,11 +258,11 @@ void update_halo(Parameters *p, int xDivisionSize, int yDivisionSize, const int 
 	{
 		copy_data_to_right_halo(p, xDivisionSize, yDivisionSize);
 	}
-	if (up != -1)
+	if (down != -1)
 	{
 		copy_data_to_up_halo(p, xDivisionSize, yDivisionSize);
 	}
-	if (down != -1)
+	if (up != -1)
 	{
 		copy_data_to_down_halo(p, xDivisionSize, yDivisionSize);
 	}
@@ -272,7 +272,7 @@ void output_v5(Parameters *p, int rank, int xDivisionSize, int yDivisionSize)
 {
 	int xOffSet = (rank % xProcessNum) * xBlockSize;
 	int yOffSet = (rank / xProcessNum) * yBlockSize;
-	int n2n3 = (2 * HALF_LENGTH + yDivisionSize) * p->n3;
+	int n1n2 = (2 * HALF_LENGTH + yDivisionSize) * (2 * HALF_LENGTH + xDivisionSize);
 	for (int rk = 0; rk < pSize; rk++)
 	{
 		fflush(stdout);
@@ -287,8 +287,8 @@ void output_v5(Parameters *p, int rank, int xDivisionSize, int yDivisionSize)
 					for (int x = HALF_LENGTH; x < HALF_LENGTH + xBlockSize; x++)
 					{
 
-						int key = x * n2n3 + y * p->n3 + z;
-						res[x + xOffSet][y + yOffSet][z] = p->prev[key];
+						int key = z * n1n2 + y * (2*HALF_LENGTH+xDivisionSize) + z;
+						//res[x + xOffSet][y + yOffSet][z] = p->prev[key];
 						printf("%d %d %d %.3f\n", x + xOffSet, y + yOffSet, z, p->prev[key]);
 						//printf("(%d %d %d):%.3f\n", x, y, z + offset, p->prev[key]);
 					}
@@ -568,6 +568,9 @@ int main(int argc, char **argv)
 	{
 		//void reference_implementation_v5(float *next, float *prev, float *coeff, float *vel, const int xDivisionSize, const int yDivisionSize, const int n3, const int half_length, const int xOffSet, const int yOffSet, const int rank)
 
+
+		update_halo(&p, xDivisionSize, yDivisionSize,up,down,left,right);
+		
 		reference_implementation_v5(p.next, p.prev, coeff, p.vel, xDivisionSize, yDivisionSize, p.n3, HALF_LENGTH, xOffSet, yOffSet, rank);
 
 		copy_data_to_send_block(&p, xDivisionSize, yDivisionSize);
@@ -584,7 +587,7 @@ int main(int argc, char **argv)
 		MPI_Sendrecv(&p.rightSendBlock[0], HALF_LENGTH * (2 * HALF_LENGTH + yDivisionSize) * p.n3, MPI_FLOAT, right, 1, &p.leftRecvBlock[0], HALF_LENGTH * (2 * HALF_LENGTH + yDivisionSize) * p.n3, MPI_FLOAT, left, 1, MPI_COMM_WORLD, &status);
 		//		printf("send down success\n");
 
-		update_halo(&p, xDivisionSize, yDivisionSize,up,down,left,right);
+		//update_halo(&p, xDivisionSize, yDivisionSize,up,down,left,right);
 
 		float *temp;
 		temp = p.next;

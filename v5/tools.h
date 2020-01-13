@@ -141,7 +141,7 @@ void reference_implementation_v5(float *next, float *prev, float *coeff, float *
             res += coeff[ir] * (prev[iz * n1n2 + iy * n1 + ix + ir * n1] + prev[iz * n1n2 + iy * n1 + ix - ir * n1]);           // vertical
             res += coeff[ir] * (prev[iz * n1n2 + iy * n1 + ix + ir * n1 * n2] + prev[iz * n1n2 + iy * n1 + ix - ir * n1 * n2]); // in front / behind
             if (ix + xOffSet == 4 && iy + yOffSet == 4 && iz == 4)
-            {  printf("x-:%d\n",iz*n1n2+iy*n1+ix-ir);
+            {  //printf("x-:%d\n",iz*n1n2+iy*n1+ix-ir);
                printf("checkrank:%d(4 4 4):x+:%.3f x-:%.3f\n", 0, prev[iz * n1n2 + iy * n1 + ix + ir], prev[iz * n1n2 + iy * n1 + ix - ir]);
                printf("checkrank:%d(4 4 4):y+:%.3f y-:%.3f\n", 0, prev[iz * n1n2 + iy * n1 + ix + ir * n1], prev[iz * n1n2 + iy * n1 + ix - ir * n1]);
                printf("checkrank:%d(4 4 4):z+:%.3f z-:%.3f\n", 0, prev[iz * n1n2 + iy * n1 + ix + ir * n1n2], prev[iz * n1n2 + iy * n1 + ix - ir *n1n2]);
