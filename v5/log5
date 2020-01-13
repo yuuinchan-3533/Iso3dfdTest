@@ -11518,26 +11518,6 @@
 13 27 27 -5.218
 14 27 27 -5.934
 15 27 27 -1.195
--------------------------------
--------------------------------
-time:           0.02 sec
--------------------------------
-time:           0.02 sec
-throughput:    80.63 MPoints/s
-flops:          2.66 GFlops
--------------------------------
-time:           0.02 sec
-throughput:    80.46 MPoints/s
-flops:          2.66 GFlops
--------------------------------
-time:           0.02 sec
-throughput:    80.41 MPoints/s
-flops:          2.65 GFlops
-time:           0.02 sec
-throughput:    80.63 MPoints/s
-flops:          2.66 GFlops
-throughput:    80.65 MPoints/s
-flops:          2.66 GFlops
 16 20 4 -2.650
 17 20 4 3.467
 18 20 4 6.398
@@ -13842,7 +13822,3 @@ flops:          2.66 GFlops
 25 27 27 -2.417
 26 27 27 -6.291
 27 27 27 -4.380
--------------------------------
-time:           0.02 sec
-throughput:    68.68 MPoints/s
-flops:          2.27 GFlops

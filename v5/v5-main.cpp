@@ -604,10 +604,10 @@ int main(int argc, char **argv)
 	throughput_mpoints = ((p.n1 - 2 * HALF_LENGTH) * (p.n2 - 2 * HALF_LENGTH) * (p.n3 - 2 * HALF_LENGTH)) / (normalized_time * 1e6f);
 	mflops = (7.0f * HALF_LENGTH + 5.0f) * throughput_mpoints;
 
-	printf("-------------------------------\n");
-	printf("time:       %8.2f sec\n", elapsed_time);
-	printf("throughput: %8.2f MPoints/s\n", throughput_mpoints);
-	printf("flops:      %8.2f GFlops\n", mflops / 1e3f);
+	//printf("-------------------------------\n");
+//	printf("time:       %8.2f sec\n", elapsed_time);
+//	printf("throughput: %8.2f MPoints/s\n", throughput_mpoints);
+//	printf("flops:      %8.2f GFlops\n", mflops / 1e3f);
 #if defined(VERIFY_RESULTS)
 	printf("\n-------------------------------\n");
 	printf("comparing one iteration to reference implementation result...\n");
