@@ -272,25 +272,24 @@ void output_v5(Parameters *p, int rank, int xDivisionSize, int yDivisionSize)
 {
 	int xOffSet = (rank % xProcessNum) * xBlockSize;
 	int yOffSet = (rank / xProcessNum) * yBlockSize;
-	int n1n2 = (2 * HALF_LENGTH + yDivisionSize) * (2 * HALF_LENGTH + xDivisionSize);
+	int n1 = 2 * HALF_LENGTH + xDivisionSize;
+	int n2 = 2 * HALF_LENGTH + yDivisionSize;
+	int n3 = p->n3;
 	for (int rk = 0; rk < pSize; rk++)
 	{
 		fflush(stdout);
 		MPI_Barrier(MPI_COMM_WORLD);
 		if (rk == rank)
 		{
-
-			for (int z = HALF_LENGTH; z < p->n3 - HALF_LENGTH; z++)
+			for (int iz = HALF_LENGTH; iz < n3-HALF_LENGTH; iz++)
 			{
-				for (int y = HALF_LENGTH; y < HALF_LENGTH + yBlockSize; y++)
+				for (int iy = HALF_LENGTH; iy < n2; iy++)
 				{
-					for (int x = HALF_LENGTH; x < HALF_LENGTH + xBlockSize; x++)
+					for (int ix = HALF_LENGTH; ix < n1; ix++)
 					{
-
-						int key = z * n1n2 + y * (2*HALF_LENGTH+xDivisionSize) + z;
-						//res[x + xOffSet][y + yOffSet][z] = p->prev[key];
-						printf("%d %d %d %.3f\n", x + xOffSet, y + yOffSet, z, p->prev[key]);
-						//printf("(%d %d %d):%.3f\n", x, y, z + offset, p->prev[key]);
+						int key = iz * n1 * n2 + iy * n1 + ix; //[z][y][x]
+						printf("%d %d %d %.3f\n", ix + xOffSet, iy + yOffSet, iz, p->prev[key]);
+				//printf("initiate(%d %d %d):%.3f %.3f\n",ix+xOffSet,iy+yOffSet,iz,ptr_prev[key],ptr_next[key]);
 					}
 				}
 			}
