@@ -283,12 +283,12 @@ void output_v5(Parameters *p, int rank, int xDivisionSize, int yDivisionSize)
 		{
 			for (int iz = HALF_LENGTH; iz < n3-HALF_LENGTH; iz++)
 			{
-				for (int iy = HALF_LENGTH; iy < n2-HALF_LENGTH; iy++)
+				for (int iy = HALF_LENGTH; iy < n2; iy++)
 				{
-					for (int ix = HALF_LENGTH; ix < n1-HALF_LENGTH; ix++)
+					for (int ix = HALF_LENGTH; ix < n1; ix++)
 					{
 						int key = iz * n1 * n2 + iy * n1 + ix; //[z][y][x]
-						printf("%d %d %d %.3f\n",ix + xOffSet, iy + yOffSet, iz, p->prev[key]);
+						printf("rank:%d(%d %d %d)%.3f\n",rank, ix + xOffSet, iy + yOffSet, iz, p->prev[key]);
 				//printf("initiate(%d %d %d):%.3f %.3f\n",ix+xOffSet,iy+yOffSet,iz,ptr_prev[key],ptr_next[key]);
 					}
 				}
@@ -604,10 +604,10 @@ int main(int argc, char **argv)
 	throughput_mpoints = ((p.n1 - 2 * HALF_LENGTH) * (p.n2 - 2 * HALF_LENGTH) * (p.n3 - 2 * HALF_LENGTH)) / (normalized_time * 1e6f);
 	mflops = (7.0f * HALF_LENGTH + 5.0f) * throughput_mpoints;
 
-	//printf("-------------------------------\n");
-//	printf("time:       %8.2f sec\n", elapsed_time);
-//	printf("throughput: %8.2f MPoints/s\n", throughput_mpoints);
-//	printf("flops:      %8.2f GFlops\n", mflops / 1e3f);
+	printf("-------------------------------\n");
+	printf("time:       %8.2f sec\n", elapsed_time);
+	printf("throughput: %8.2f MPoints/s\n", throughput_mpoints);
+	printf("flops:      %8.2f GFlops\n", mflops / 1e3f);
 #if defined(VERIFY_RESULTS)
 	printf("\n-------------------------------\n");
 	printf("comparing one iteration to reference implementation result...\n");
