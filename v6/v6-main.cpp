@@ -516,7 +516,7 @@ int main(int argc, char **argv)
 	}
 
 	initiate_params_v6(p.n1, p.n2, p.n3);
-	//printf("%d  %d\n", xProcessNum, yProcessNum);
+	printf("%d  %d  %d\n", xProcessNum, yProcessNum, zProcessNum);
 	// Make sure nreps is rouded up to next even number (to support swap)
 	p.nreps = ((p.nreps + 1) / 2) * 2;
 
@@ -594,12 +594,12 @@ int main(int argc, char **argv)
 		down = MPI_PROC_NULL;
 		zDivisionSize = (p.n3 - 2 * HALF_LENGTH) - (yProcessNum - 1) * zBlockSize;
 	}
-
+	printf("%s  %d\n", __FILE__, __LINE__);
 	// allocate dat memory
 	//printf("rank:%d left:%d right:%d up:%d down:%d \n", rank, left, right, up, down);
 	size_t nsize = p.n1 * p.n2 * p.n3;
 
-	size_t nsize_mpi = (2 * HALF_LENGTH + xDivisionSize) * (2 * HALF_LENGTH + yDivisionSize) * p.n3;
+	size_t nsize_mpi = (2 * HALF_LENGTH + xDivisionSize) * (2 * HALF_LENGTH + yDivisionSize) * (2 * HALF_LENGTH + zDivisionSize);
 	size_t nsize_xDimension_halo = HALF_LENGTH * (2 * HALF_LENGTH + yDivisionSize) * (2 * HALF_LENGTH + zDivisionSize); //左右两个halo区并成一块
 	size_t nsize_yDimension_halo = (2 * HALF_LENGTH + xDivisionSize) * HALF_LENGTH * (2 * HALF_LENGTH + zDivisionSize);
 	size_t nsize_zDimension_halo = (2 * HALF_LENGTH + xDivisionSize) * (2 * HALF_LENGTH + yDivisionSize) * HALF_LENGTH;
@@ -657,6 +657,7 @@ int main(int argc, char **argv)
 	p.upRecvBlock = &ur[16 + ALIGN_HALO_FACTOR + MASK_ALLOC_OFFSET(64)];
 	p.downRecvBlock = &dr[16 + ALIGN_HALO_FACTOR + MASK_ALLOC_OFFSET(80)];
 
+	printf("%s  %d\n", __FILE__, __LINE__);
 	//initialize(p.prev, p.next, p.vel, &p, nbytes);
 	// A couple of run to start threading library
 	//int tmp_nreps = 2;
@@ -667,14 +668,15 @@ int main(int argc, char **argv)
 	int yOffSet = (rank % (xProcessNum * yProcessNum)) / xBlockSize * yBlockSize;
 	int zOffSet = rank / (xProcessNum * yProcessNum) * zBlockSize;
 	initiate_v6(rank, p.prev, p.next, p.vel, &p, xDivisionSize, yDivisionSize, zDivisionSize, xOffSet, yOffSet, zOffSet);
+	printf("%s  %d\n", __FILE__, __LINE__);
 	wstart = walltime();
 	//MPI_Type_vector(HALF_LENGTH+yDivisionSize+HALF_LENGTH, HALF_LENGTH, HALF_LENGTH + xDivisionSize + HALF_LENGTH, MPI_FLOAT, &yHaloType);
 	//MPI_Type_commit(&yHaloType);
 	//printf("initiate success\n");
 
-	int xSendRecvSize = HALF_LENGTH * (2*HALF_LENGTH+yDivisionSize) * (2*HALF_LENGTH+zDivisionSize);
-	int ySendRecvSize = (2 * HALF_LENGTH + xDivisionSize) * HALF_LENGTH * (2*HALF_LENGTH+zDivisionSize);
-	int zSendRecvSize = (2 * HALF_LENGTH + xDivisionSize) * (2*HALF_LENGTH+yDivisionSize) * HALF_LENGTH;
+	int xSendRecvSize = HALF_LENGTH * (2 * HALF_LENGTH + yDivisionSize) * (2 * HALF_LENGTH + zDivisionSize);
+	int ySendRecvSize = (2 * HALF_LENGTH + xDivisionSize) * HALF_LENGTH * (2 * HALF_LENGTH + zDivisionSize);
+	int zSendRecvSize = (2 * HALF_LENGTH + xDivisionSize) * (2 * HALF_LENGTH + yDivisionSize) * HALF_LENGTH;
 	for (int step = 0; step < /*p.nreps*/ 4; step++)
 	{
 		//void reference_implementation_v5(float *next, float *prev, float *coeff, float *vel, const int xDivisionSize, const int yDivisionSize, const int n3, const int half_length, const int xOffSet, const int yOffSet, const int rank)
@@ -683,27 +685,25 @@ int main(int argc, char **argv)
 
 		reference_implementation_v5(p.next, p.prev, coeff, p.vel, xDivisionSize, yDivisionSize, p.n3, HALF_LENGTH, xOffSet, yOffSet, rank);
 
-		copy_data_to_send_block(&p, xDivisionSize, yDivisionSize,zDivisionSize);
+		copy_data_to_send_block(&p, xDivisionSize, yDivisionSize, zDivisionSize);
 
 		MPI_Sendrecv(&p.leftSendBlock[0], xSendRecvSize, MPI_FLOAT, left, 1, &p.rightRecvBlock[0], xSendRecvSize, MPI_FLOAT, right, 1, MPI_COMM_WORLD, &status);
-		//		printf("send left success\n");
+		printf("send left success\n");
 
 		MPI_Sendrecv(&p.rightSendBlock[0], xSendRecvSize, MPI_FLOAT, right, 1, &p.leftRecvBlock[0], xSendRecvSize, MPI_FLOAT, left, 1, MPI_COMM_WORLD, &status);
-		//		printf("send right success\n");
+		printf("send right success\n");
 
 		MPI_Sendrecv(&p.frontSendBlock[0], ySendRecvSize, MPI_FLOAT, front, 1, &p.backRecvBlock[0], ySendRecvSize, MPI_FLOAT, back, 1, MPI_COMM_WORLD, &status);
-		//		printf("send left success\n");
+		printf("send front success\n");
 
 		MPI_Sendrecv(&p.backSendBlock[0], ySendRecvSize, MPI_FLOAT, back, 1, &p.frontRecvBlock[0], ySendRecvSize, MPI_FLOAT, front, 1, MPI_COMM_WORLD, &status);
-		//		printf("send right success\n");
+		printf("send back success\n");
 
 		MPI_Sendrecv(&p.upSendBlock[0], zSendRecvSize, MPI_FLOAT, up, 1, &p.downRecvBlock[0], zSendRecvSize, MPI_FLOAT, down, 1, MPI_COMM_WORLD, &status);
-		//		printf("send up success\n");
+		printf("send up success\n");
 
 		MPI_Sendrecv(&p.downSendBlock[0], zSendRecvSize, MPI_FLOAT, down, 1, &p.upRecvBlock[0], zSendRecvSize, MPI_FLOAT, up, 1, MPI_COMM_WORLD, &status);
-		//		printf("send down success\n");
-
-	
+		printf("send down success\n");
 
 		//update_halo(&p, xDivisionSize, yDivisionSize,up,down,left,right);
 
@@ -713,7 +713,7 @@ int main(int argc, char **argv)
 		p.prev = temp;
 	}
 	//void output_v5(Parameters *p, int rank, int xDivisionSize, int yDivisionSize)
-	output_v6(&p, rank, xDivisionSize, yDivisionSize,zDivisionSize,xOffSet,yOffSet,zOffSet);
+	output_v6(&p, rank, xDivisionSize, yDivisionSize, zDivisionSize, xOffSet, yOffSet, zOffSet);
 
 	wstop = walltime();
 
