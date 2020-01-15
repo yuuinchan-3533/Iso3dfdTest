@@ -671,7 +671,6 @@ int main(int argc, char **argv)
 	//MPI_Type_vector(HALF_LENGTH+yDivisionSize+HALF_LENGTH, HALF_LENGTH, HALF_LENGTH + xDivisionSize + HALF_LENGTH, MPI_FLOAT, &yHaloType);
 	//MPI_Type_commit(&yHaloType);
 	//printf("initiate success\n");
-	printf("rank:%d xs:%d ys:%d zs:%d\n",rank,xOffSet,yOffSet,zOffSet);
 	int xSendRecvSize = HALF_LENGTH * (2 * HALF_LENGTH + yDivisionSize) * (2 * HALF_LENGTH + zDivisionSize);
 	int ySendRecvSize = (2 * HALF_LENGTH + xDivisionSize) * HALF_LENGTH * (2 * HALF_LENGTH + zDivisionSize);
 	int zSendRecvSize = (2 * HALF_LENGTH + xDivisionSize) * (2 * HALF_LENGTH + yDivisionSize) * HALF_LENGTH;
@@ -681,7 +680,7 @@ int main(int argc, char **argv)
 
 		update_halo(&p, xDivisionSize, yDivisionSize, zDivisionSize, up, down, front, back, left, right);
 
-		reference_implementation_v5(p.next, p.prev, coeff, p.vel, xDivisionSize, yDivisionSize, p.n3, HALF_LENGTH, xOffSet, yOffSet, rank);
+		reference_implementation_v6(p.next, p.prev, coeff, p.vel, xDivisionSize, yDivisionSize, zDivisionSize,HALF_LENGTH, xOffSet, yOffSet,zOffSet, rank);
 
 		copy_data_to_send_block(&p, xDivisionSize, yDivisionSize, zDivisionSize);
 

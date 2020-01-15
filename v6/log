@@ -1,58 +1,6 @@
 n1=64 n2=64 n3=64 nreps=100 num_threads=24 HALF_LENGTH=4
 n1_thrd_block=64 n2_thrd_block=1 n3_thrd_block=124
 allocating prev, next and vel: total 3.00005 Mbytes
-checkrank:0(4 4 4):x+:-0.894 x-:-0.035
-checkrank:0(4 4 4):y+:0.999 y-:0.444
-checkrank:0(4 4 4):z+:-0.483 z-:-1.000
-checkrank:0(4 4 4):x+:-0.106 x-:0.822
-checkrank:0(4 4 4):y+:-0.817 y-:0.115
-checkrank:0(4 4 4):z+:0.026 z-:-0.865
-checkrank:0(4 4 4):x+:0.779 x-:0.923
-checkrank:0(4 4 4):y+:0.371 y-:-0.637
-checkrank:0(4 4 4):z+:0.529 z-:-0.491
-checkrank:0(4 4 4):x+:0.948 x-:0.176
-checkrank:0(4 4 4):y+:0.194 y-:0.954
-checkrank:0(4 4 4):z+:0.886 z-:0.018
-rank:0(4 4 4):prev:-0.860 next:-1.210 res:0.002
-checkrank:0(4 4 4):x+:-2.236 x-:-0.999
-checkrank:0(4 4 4):y+:2.038 y-:0.896
-checkrank:0(4 4 4):z+:-0.091 z-:-0.004
-checkrank:0(4 4 4):x+:-1.206 x-:-0.570
-checkrank:0(4 4 4):y+:-2.210 y-:-0.993
-checkrank:0(4 4 4):z+:1.053 z-:0.503
-checkrank:0(4 4 4):x+:0.932 x-:0.384
-checkrank:0(4 4 4):y+:1.671 y-:0.771
-checkrank:0(4 4 4):z+:1.907 z-:0.871
-checkrank:0(4 4 4):x+:2.214 x-:0.984
-checkrank:0(4 4 4):y+:-0.594 y-:-0.301
-checkrank:0(4 4 4):z+:2.235 z-:1.000
-rank:0(4 4 4):prev:-1.210 next:-1.559 res:0.004
-checkrank:0(4 4 4):x+:-3.577 x-:-0.035
-checkrank:0(4 4 4):y+:3.076 y-:0.444
-checkrank:0(4 4 4):z+:0.301 z-:-1.000
-checkrank:0(4 4 4):x+:-2.306 x-:0.822
-checkrank:0(4 4 4):y+:-3.603 y-:0.115
-checkrank:0(4 4 4):z+:2.079 z-:-0.865
-checkrank:0(4 4 4):x+:1.085 x-:0.923
-checkrank:0(4 4 4):y+:2.970 y-:-0.637
-checkrank:0(4 4 4):z+:3.284 z-:-0.491
-checkrank:0(4 4 4):x+:3.479 x-:0.176
-checkrank:0(4 4 4):y+:-1.381 y-:0.954
-checkrank:0(4 4 4):z+:3.585 z-:0.018
-rank:0(4 4 4):prev:-1.559 next:-1.908 res:0.005
-checkrank:0(4 4 4):x+:-4.917 x-:-0.999
-checkrank:0(4 4 4):y+:4.113 y-:0.896
-checkrank:0(4 4 4):z+:0.693 z-:-0.004
-checkrank:0(4 4 4):x+:-3.406 x-:-0.570
-checkrank:0(4 4 4):y+:-4.995 y-:-0.993
-checkrank:0(4 4 4):z+:3.104 z-:0.503
-checkrank:0(4 4 4):x+:1.237 x-:0.384
-checkrank:0(4 4 4):y+:4.268 y-:0.771
-checkrank:0(4 4 4):z+:4.660 z-:0.871
-checkrank:0(4 4 4):x+:4.743 x-:0.984
-checkrank:0(4 4 4):y+:-2.168 y-:-0.301
-checkrank:0(4 4 4):z+:4.933 z-:1.000
-rank:0(4 4 4):prev:-1.908 next:-2.256 res:0.007
 (4 4 4):-2.256
 (5 4 4):-6.256
 (6 4 4):-4.505
@@ -175673,3 +175621,8 @@ rank:0(4 4 4):prev:-1.908 next:-2.256 res:0.007
 time:           0.00 sec
 throughput:      inf MPoints/s
 flops:           inf GFlops
+
+-------------------------------
+comparing one iteration to reference implementation result...
+  Result within epsilon
+  TEST PASSED!
