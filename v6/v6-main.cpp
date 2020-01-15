@@ -70,7 +70,7 @@ typedef struct
 
 //Function used for initialization
 
-void initiate_v6(int rank, float *ptr_prev, float *ptr_next, float *ptr_vel, Parameters *p, int xDivisionSize, int yDivisionSize, int zDivisionSize, int xOffSet, int yOffSet, int zOffSet)
+void initiate_v6(int rank, float *ptr_prev, float *ptr_next, float *ptr_vel, Parameters *p, int xDivisionSize, int yDivisionSize, int zDivisionSize,const int xOffSet, const int yOffSet, const int zOffSet)
 {
 
 	int n1 = 2 * HALF_LENGTH + xDivisionSize;
@@ -413,7 +413,8 @@ void initiate_params_v6(int n1, int n2, int n3)
 	float diff = n1 > n2 ? (n1 + 0.0) / (n2 + 0.0) : (n2 + 0.0) / (n1 + 0.0);
 	float minn = 100000.0;
 	float tempdiff = 0;
-	x = floor(pow(pSize * n1 * n1 / (n2 * n3), 1 / 3));
+	x = floor(pow(pSize * n1 * n1 * 1.0 / (n2 * n3), 1.0 / 3));
+
 	if ((n2 + 0.0) / n1 >= 1)
 	{
 		y = floor((x + 0.0) * n2 / n1);
@@ -422,6 +423,7 @@ void initiate_params_v6(int n1, int n2, int n3)
 	{
 		y = ceil((x + 0.0) * n2 / n1);
 	}
+	
 	z = floor(pSize / (x * y * 1.0));
 	if (x * y * z > pSize)
 	{
@@ -516,7 +518,6 @@ int main(int argc, char **argv)
 	}
 
 	initiate_params_v6(p.n1, p.n2, p.n3);
-	printf("%d  %d  %d\n", xProcessNum, yProcessNum, zProcessNum);
 	// Make sure nreps is rouded up to next even number (to support swap)
 	p.nreps = ((p.nreps + 1) / 2) * 2;
 
@@ -594,7 +595,6 @@ int main(int argc, char **argv)
 		down = MPI_PROC_NULL;
 		zDivisionSize = (p.n3 - 2 * HALF_LENGTH) - (yProcessNum - 1) * zBlockSize;
 	}
-	printf("%s  %d\n", __FILE__, __LINE__);
 	// allocate dat memory
 	//printf("rank:%d left:%d right:%d up:%d down:%d \n", rank, left, right, up, down);
 	size_t nsize = p.n1 * p.n2 * p.n3;
@@ -627,8 +627,8 @@ int main(int argc, char **argv)
 	float *rr = (float *)_mm_malloc((nbytes_xDimension_halo + 16 + MASK_ALLOC_OFFSET(16)) * sizeof(float), CACHELINE_BYTES);
 	float *fr = (float *)_mm_malloc((nbytes_yDimension_halo + 16 + MASK_ALLOC_OFFSET(32)) * sizeof(float), CACHELINE_BYTES);
 	float *br = (float *)_mm_malloc((nbytes_yDimension_halo + 16 + MASK_ALLOC_OFFSET(48)) * sizeof(float), CACHELINE_BYTES);
-	float *ur = (float *)_mm_malloc((nbytes_yDimension_halo + 16 + MASK_ALLOC_OFFSET(64)) * sizeof(float), CACHELINE_BYTES);
-	float *dr = (float *)_mm_malloc((nbytes_yDimension_halo + 16 + MASK_ALLOC_OFFSET(80)) * sizeof(float), CACHELINE_BYTES);
+	float *ur = (float *)_mm_malloc((nbytes_zDimension_halo + 16 + MASK_ALLOC_OFFSET(64)) * sizeof(float), CACHELINE_BYTES);
+	float *dr = (float *)_mm_malloc((nbytes_zDimension_halo + 16 + MASK_ALLOC_OFFSET(80)) * sizeof(float), CACHELINE_BYTES);
 
 	if (prev_base == NULL || next_base == NULL || vel_base == NULL)
 	{
@@ -657,7 +657,6 @@ int main(int argc, char **argv)
 	p.upRecvBlock = &ur[16 + ALIGN_HALO_FACTOR + MASK_ALLOC_OFFSET(64)];
 	p.downRecvBlock = &dr[16 + ALIGN_HALO_FACTOR + MASK_ALLOC_OFFSET(80)];
 
-	printf("%s  %d\n", __FILE__, __LINE__);
 	//initialize(p.prev, p.next, p.vel, &p, nbytes);
 	// A couple of run to start threading library
 	//int tmp_nreps = 2;
@@ -665,15 +664,14 @@ int main(int argc, char **argv)
 	//iso_3dfd(p.next, p.prev, p.vel, coeff, p.n1, p.n2, p.n3, p.num_threads, tmp_nreps, p.n1_Tblock, p.n2_Tblock, p.n3_Tblock);
 
 	int xOffSet = (rank % xProcessNum) * xBlockSize;
-	int yOffSet = (rank % (xProcessNum * yProcessNum)) / xBlockSize * yBlockSize;
+	int yOffSet = (rank % (xProcessNum * yProcessNum)) / xProcessNum * yBlockSize;
 	int zOffSet = rank / (xProcessNum * yProcessNum) * zBlockSize;
 	initiate_v6(rank, p.prev, p.next, p.vel, &p, xDivisionSize, yDivisionSize, zDivisionSize, xOffSet, yOffSet, zOffSet);
-	printf("%s  %d\n", __FILE__, __LINE__);
 	wstart = walltime();
 	//MPI_Type_vector(HALF_LENGTH+yDivisionSize+HALF_LENGTH, HALF_LENGTH, HALF_LENGTH + xDivisionSize + HALF_LENGTH, MPI_FLOAT, &yHaloType);
 	//MPI_Type_commit(&yHaloType);
 	//printf("initiate success\n");
-
+	printf("rank:%d xs:%d ys:%d zs:%d\n",rank,xOffSet,yOffSet,zOffSet);
 	int xSendRecvSize = HALF_LENGTH * (2 * HALF_LENGTH + yDivisionSize) * (2 * HALF_LENGTH + zDivisionSize);
 	int ySendRecvSize = (2 * HALF_LENGTH + xDivisionSize) * HALF_LENGTH * (2 * HALF_LENGTH + zDivisionSize);
 	int zSendRecvSize = (2 * HALF_LENGTH + xDivisionSize) * (2 * HALF_LENGTH + yDivisionSize) * HALF_LENGTH;
@@ -688,22 +686,16 @@ int main(int argc, char **argv)
 		copy_data_to_send_block(&p, xDivisionSize, yDivisionSize, zDivisionSize);
 
 		MPI_Sendrecv(&p.leftSendBlock[0], xSendRecvSize, MPI_FLOAT, left, 1, &p.rightRecvBlock[0], xSendRecvSize, MPI_FLOAT, right, 1, MPI_COMM_WORLD, &status);
-		printf("send left success\n");
 
 		MPI_Sendrecv(&p.rightSendBlock[0], xSendRecvSize, MPI_FLOAT, right, 1, &p.leftRecvBlock[0], xSendRecvSize, MPI_FLOAT, left, 1, MPI_COMM_WORLD, &status);
-		printf("send right success\n");
 
 		MPI_Sendrecv(&p.frontSendBlock[0], ySendRecvSize, MPI_FLOAT, front, 1, &p.backRecvBlock[0], ySendRecvSize, MPI_FLOAT, back, 1, MPI_COMM_WORLD, &status);
-		printf("send front success\n");
 
 		MPI_Sendrecv(&p.backSendBlock[0], ySendRecvSize, MPI_FLOAT, back, 1, &p.frontRecvBlock[0], ySendRecvSize, MPI_FLOAT, front, 1, MPI_COMM_WORLD, &status);
-		printf("send back success\n");
-
+	
 		MPI_Sendrecv(&p.upSendBlock[0], zSendRecvSize, MPI_FLOAT, up, 1, &p.downRecvBlock[0], zSendRecvSize, MPI_FLOAT, down, 1, MPI_COMM_WORLD, &status);
-		printf("send up success\n");
 
 		MPI_Sendrecv(&p.downSendBlock[0], zSendRecvSize, MPI_FLOAT, down, 1, &p.upRecvBlock[0], zSendRecvSize, MPI_FLOAT, up, 1, MPI_COMM_WORLD, &status);
-		printf("send down success\n");
 
 		//update_halo(&p, xDivisionSize, yDivisionSize,up,down,left,right);
 
@@ -712,21 +704,23 @@ int main(int argc, char **argv)
 		p.next = p.prev;
 		p.prev = temp;
 	}
+	
+	// allocate dat memory
 	//void output_v5(Parameters *p, int rank, int xDivisionSize, int yDivisionSize)
-	output_v6(&p, rank, xDivisionSize, yDivisionSize, zDivisionSize, xOffSet, yOffSet, zOffSet);
+	//output_v6(&p, rank, xDivisionSize, yDivisionSize, zDivisionSize, xOffSet, yOffSet, zOffSet);
 
-	wstop = walltime();
+	//wstop = walltime();
 
 	// report time
-	elapsed_time = wstop - wstart;
-	float normalized_time = elapsed_time / p.nreps;
-	throughput_mpoints = ((p.n1 - 2 * HALF_LENGTH) * (p.n2 - 2 * HALF_LENGTH) * (p.n3 - 2 * HALF_LENGTH)) / (normalized_time * 1e6f);
-	mflops = (7.0f * HALF_LENGTH + 5.0f) * throughput_mpoints;
+	//elapsed_time = wstop - wstart;
+	//float normalized_time = elapsed_time / p.nreps;
+	//throughput_mpoints = ((p.n1 - 2 * HALF_LENGTH) * (p.n2 - 2 * HALF_LENGTH) * (p.n3 - 2 * HALF_LENGTH)) / (normalized_time * 1e6f);
+	//mflops = (7.0f * HALF_LENGTH + 5.0f) * throughput_mpoints;
 
-	printf("-------------------------------\n");
-	printf("time:       %8.2f sec\n", elapsed_time);
-	printf("throughput: %8.2f MPoints/s\n", throughput_mpoints);
-	printf("flops:      %8.2f GFlops\n", mflops / 1e3f);
+	//printf("-------------------------------\n");
+	//printf("time:       %8.2f sec\n", elapsed_time);
+	//printf("throughput: %8.2f MPoints/s\n", throughput_mpoints);
+	//printf("flops:      %8.2f GFlops\n", mflops / 1e3f);
 #if defined(VERIFY_RESULTS)
 	printf("\n-------------------------------\n");
 	printf("comparing one iteration to reference implementation result...\n");
