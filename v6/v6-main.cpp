@@ -707,7 +707,7 @@ int main(int argc, char **argv)
 	
 	// allocate dat memory
 	//void output_v5(Parameters *p, int rank, int xDivisionSize, int yDivisionSize)
-	//output_v6(&p, rank, xDivisionSize, yDivisionSize, zDivisionSize, xOffSet, yOffSet, zOffSet);
+	output_v6(&p, rank, xDivisionSize, yDivisionSize, zDivisionSize, xOffSet, yOffSet, zOffSet);
 
 	//wstop = walltime();
 
