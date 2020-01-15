@@ -56,7 +56,7 @@ void iso_3dfd_it(float *ptr_next, float *ptr_prev, float *ptr_vel, float *coeff,
 						value += coeff[ir] * (ptr_prev[offset + ir] + ptr_prev[offset - ir]); // horizontal
 						value += coeff[ir] * (ptr_prev[offset + ir * n1] + ptr_prev[offset - ir * n1]); // vertical
 						value += coeff[ir] * (ptr_prev[offset + ir * dimn1n2] + ptr_prev[offset - ir * dimn1n2]); // in front / behind
-						if (ix == 4 && iy == 4 && iz == 4)
+						if (ix == 59 && iy == 58 && iz == 59)
 						{ //      printf("x-:%d\n",iz*n1n2+iy*n1+ix-ir);
 							printf("checkrank:%d(4 4 4):x+:%.3f x-:%.3f\n", 0, ptr_prev[iz * n1n2 + iy * n1 + ix + ir], ptr_prev[iz * n1n2 + iy * n1 + ix - ir]);
 							printf("checkrank:%d(4 4 4):y+:%.3f y-:%.3f\n", 0, ptr_prev[iz * n1n2 + iy * n1 + ix + ir * n1], ptr_prev[iz * n1n2 + iy * n1 + ix - ir * n1]);
@@ -64,7 +64,7 @@ void iso_3dfd_it(float *ptr_next, float *ptr_prev, float *ptr_vel, float *coeff,
 						}
 					}
 					ptr_next[offset] = 2.0f * ptr_prev[offset] - ptr_next[offset] + value * ptr_vel[offset];
-					if(ix==4 && iy==4 && iz==4){
+					if(ix==59 && iy==58 && iz==59){
                  				printf("rank:%d(%d %d %d):prev:%.3f next:%.3f res:%.3f\n",0,ix,iy,iz,ptr_prev[offset],ptr_next[offset],value);
 					}
 				//	ptr_next[offset] = 2.0f * ptr_prev[offset] - ptr_next[offset] + value * ptr_vel[offset];

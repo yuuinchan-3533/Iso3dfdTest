@@ -157,7 +157,7 @@ void reference_implementation_v5(float *next, float *prev, float *coeff, float *
   }
 }
 
-void reference_implementation_v6(float *next, float *prev, float *coeff, float *vel, const int xDivisionSize, const int yDivisionSize, const int zDivisionSize, const int half_length, const int xOffSet, const int yOffSet, const int rank)
+void reference_implementation_v6(float *next, float *prev, float *coeff, float *vel, const int xDivisionSize, const int yDivisionSize, const int zDivisionSize, const int half_length, const int xOffSet, const int yOffSet, const int zOffSet,const int rank)
 {
   int n1 = 2 * half_length + xDivisionSize;
   int n2 = 2 * half_length + yDivisionSize;
@@ -178,8 +178,18 @@ void reference_implementation_v6(float *next, float *prev, float *coeff, float *
             res += coeff[ir] * (prev[iz * n1n2 + iy * n1 + ix + ir] + prev[iz * n1n2 + iy * n1 + ix - ir]);                     // horizontal
             res += coeff[ir] * (prev[iz * n1n2 + iy * n1 + ix + ir * n1] + prev[iz * n1n2 + iy * n1 + ix - ir * n1]);           // vertical
             res += coeff[ir] * (prev[iz * n1n2 + iy * n1 + ix + ir * n1 * n2] + prev[iz * n1n2 + iy * n1 + ix - ir * n1 * n2]); // in front / behind
+            if (ix + xOffSet == 59 && iy + yOffSet == 58 && iz + xOffSet == 59)
+            { 
+                 printf("checkrank:%d(59 58 59):x+:%.3f x-:%.3f\n", 0, prev[iz * n1n2 + iy * n1 + ix + ir], prev[iz * n1n2 + iy * n1 + ix - ir]);
+                 printf("checkrank:%d(59 58 59):y+:%.3f y-:%.3f\n", 0, prev[iz * n1n2 + iy * n1 + ix + ir * n1], prev[iz * n1n2 + iy * n1 + ix - ir * n1]);
+                 printf("checkrank:%d(59 58 59):z+:%.3f z-:%.3f\n", 0, prev[iz * n1n2 + iy * n1 + ix + ir * n1n2], prev[iz * n1n2 + iy * n1 + ix - ir *n1n2]);
+            }
           }
           next[iz * n1n2 + iy * n1 + ix] = 2.0f * prev[iz * n1n2 + iy * n1 + ix] - next[iz * n1n2 + iy * n1 + ix] + res * vel[iz * n1n2 + iy * n1 + ix];
+          if (ix + xOffSet == 59 && iy + yOffSet == 58 && iz + xOffSet == 59)
+          {
+            printf("rank:%d(%d %d %d):prev:%.3f next:%.3f res:%.3f\n",rank,ix+xOffSet,iy+yOffSet,iz+zOffSet,prev[iz * n1n2 + iy * n1 + ix],next[iz * n1n2 + iy * n1 + ix],res);
+          }
         }
       }
     }
