@@ -593,7 +593,7 @@ int main(int argc, char **argv)
 	if (down >= pSize)
 	{
 		down = MPI_PROC_NULL;
-		zDivisionSize = (p.n3 - 2 * HALF_LENGTH) - (yProcessNum - 1) * zBlockSize;
+		zDivisionSize = (p.n3 - 2 * HALF_LENGTH) - (zProcessNum - 1) * zBlockSize;
 	}
 	// allocate dat memory
 	//printf("rank:%d left:%d right:%d up:%d down:%d \n", rank, left, right, up, down);
